@@ -9,7 +9,7 @@ from fastapi.exceptions import RequestValidationError, HTTPException
 from fastapi.openapi.utils import get_openapi
 
 from src.infrastructure.cache.redis_cache import RedisConnect, RedisCacheSystem
-from src.infrastructure.config.config_model import Config, make_fastapi_instance_kwargs
+from src.infrastructure.config.config import Config, make_fastapi_instance_kwargs
 from src.infrastructure.database.exceptions.product import DatabaseException
 from src.infrastructure.database.repositories.user_repository import UserRepository
 from src.infrastructure.ioc.ioc import IoC
