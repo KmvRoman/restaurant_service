@@ -24,9 +24,15 @@ class BasketService:
             basket.prepared.append(product)
         return basket
 
-    def delete_product(self, product_id: ProductId, modification: Optional[int], basket: Basket) -> Basket:
+    def delete_product(
+            self, product_id: ProductId,
+            modification: Optional[int], basket: Basket,
+    ) -> Basket:
         for count, pr in enumerate(basket.prepared):
             if pr.product_id == product_id and pr.modification == modification:
-                basket.prepared.pop(count)
+                if pr.count < 2:
+                    basket.prepared.pop(count)
+                else:
+                    pr.count -= 1
                 break
         return basket
