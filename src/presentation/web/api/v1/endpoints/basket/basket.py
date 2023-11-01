@@ -97,7 +97,11 @@ async def get_basket(
             order_type=payload.order_type, language=payload.language,
         ))
     except CurrentBasketNotFound:
-        raise BasketIsEmpty
+        return GetBasketResponse(
+            user_id=payload.user_id, order_type=payload.order_type, amount=0,
+            shipping_amount=None, total_amount=0,
+            products=[],
+        )
     except WrongLocations:
         raise LocationsInvalid
     return GetBasketResponse(

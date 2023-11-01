@@ -79,9 +79,8 @@ async def main():
         await dp.start_polling(bot)
     finally:
         await bot.session.close()
-        session_make.close_all()
         await engine.dispose()
-        await get_connect.close()
+        await get_connect.aclose()
 
 
 async def start_bot():
