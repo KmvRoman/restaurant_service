@@ -12,5 +12,5 @@ class CategoryNameTable(Base):
         ForeignKey(column="categoriestable.id", ondelete="CASCADE", onupdate="CASCADE"),
         nullable=False,
     )
-    category: Mapped[str] = mapped_column(VARCHAR(30), nullable=False)
+    category: Mapped[str] = mapped_column(VARCHAR(255), nullable=False)
     language: Mapped[Language] = mapped_column(nullable=False)

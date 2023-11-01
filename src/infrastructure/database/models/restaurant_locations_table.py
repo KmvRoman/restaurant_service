@@ -11,6 +11,6 @@ class RestaurantLocationsTable(Base):
         ForeignKey(column="restauranttable.id", ondelete="CASCADE", onupdate="CASCADE"),
         nullable=False,
     )
-    address: Mapped[str] = mapped_column(VARCHAR(20), nullable=False)
+    address: Mapped[str] = mapped_column(VARCHAR(100), nullable=False)
     latitude: Mapped[float] = mapped_column()
     longitude: Mapped[float] = mapped_column()

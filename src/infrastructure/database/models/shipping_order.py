@@ -11,7 +11,7 @@ class ShippingOrderTable(Base):
         ForeignKey(column="ordertable.id", ondelete="CASCADE", onupdate="CASCADE"),
         nullable=False,
     )
-    address: Mapped[str] = mapped_column(VARCHAR(30), nullable=False)
-    comment: Mapped[str] = mapped_column(VARCHAR(50), nullable=False)
+    address: Mapped[str] = mapped_column(VARCHAR(100), nullable=False)
+    comment: Mapped[str] = mapped_column(VARCHAR(255), nullable=False)
     shipping_length: Mapped[float] = mapped_column(FLOAT, nullable=False)
     total_amount: Mapped[int] = mapped_column(BIGINT, nullable=False)

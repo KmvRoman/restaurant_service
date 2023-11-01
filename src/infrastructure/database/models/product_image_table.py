@@ -11,4 +11,4 @@ class ProductImageTable(Base):
         ForeignKey(column="producttable.id", ondelete="CASCADE", onupdate="CASCADE"),
         nullable=False,
     )
-    image: Mapped[str] = mapped_column(VARCHAR(255), nullable=False)
+    image: Mapped[str] = mapped_column(VARCHAR(500), nullable=False)

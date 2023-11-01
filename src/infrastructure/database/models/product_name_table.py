@@ -12,5 +12,5 @@ class ProductNameTable(Base):
         ForeignKey(column="producttable.id", ondelete="CASCADE", onupdate="CASCADE"),
         nullable=False,
     )
-    name: Mapped[str] = mapped_column(VARCHAR(20), nullable=False)
+    name: Mapped[str] = mapped_column(VARCHAR(255), nullable=False)
     language: Mapped[Language] = mapped_column(nullable=False)
