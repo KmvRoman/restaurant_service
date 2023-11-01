@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends
 
 from src.application.add_product_to_basket.dto import AddProductToBasketDtoInput
-from src.application.common.exceptions import CurrentBasketNotFound, RestaurantLocationsNotFound, ProductsIsEmpty
+from src.application.common.exceptions import CurrentBasketNotFound, RestaurantLocationsNotFound, ProductsIsEmpty, \
+    ProductNotExistError
 from src.application.delete_product_from_basket.dto import DeleteProductFromBasketDtoInput
 from src.application.read_current_basket.dto import ReadCurrentBasketDtoInput
 from src.application.read_products.dto import ReadProductsDtoInput
@@ -68,6 +69,8 @@ async def get_products(
                 language=payload.language,
             )
         )
+    except ProductNotExistError:
+        return []
     except RestaurantLocationsNotFound:
         raise LocationsInvalid
     return [
