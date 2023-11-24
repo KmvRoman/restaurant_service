@@ -1,6 +1,5 @@
 from typing import Any, Optional, Dict, no_type_check
 
-from aiohttp import ClientSession
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 from starlette.middleware.base import BaseHTTPMiddleware
