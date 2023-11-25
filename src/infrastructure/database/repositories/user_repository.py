@@ -20,8 +20,9 @@ from src.infrastructure.database import (
     ProductNameTable, ProductTable, ProductImageTable, ProductDescriptionTable,
     ProductPriceTable, ProductPriceNameTable, BasketTable, ProductBasketTable,
     ProductBasketModificationTable, CategoriesTable, CategoryNameTable,
-    RestaurantBannerTable, RestaurantTable, RestaurantNameDescriptionTable, ShippingOrderTable, OrderTable,
-    ShippingLocationTable, ProductOrderTable, PaymentTable,
+    RestaurantBannerTable, RestaurantTable, RestaurantNameDescriptionTable,
+    ShippingOrderTable, OrderTable, ShippingLocationTable, ProductOrderTable,
+    PaymentTable, GroupTable,
 )
 from src.infrastructure.database.enums import TelegramStatus
 from src.infrastructure.database.exceptions.product import (
@@ -643,3 +644,8 @@ class UserRepository(BaseRepository):
             ShippingOrderTable.total_amount, ShippingLocationTable.latitude, ShippingLocationTable.longitude,
             ShippingOrderTable.address, ShippingOrderTable.comment,ShippingOrderTable.shipping_length,
         ).where(OrderTable.id == order_id)
+
+    async def read_branch_group(self, restaurant_location_id: int) -> int:
+        stmt = select(GroupTable.group_id).where(GroupTable.restaurant_location_id == restaurant_location_id)
+        group_id = (await self.session.execute(stmt)).scalars().first()
+        return group_id

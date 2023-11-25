@@ -254,3 +254,8 @@ class ShippingLength(Protocol):
 class GetAddressFromLocation(Protocol):
     async def get_address(self, user_location: Location) -> str:
         raise NotImplementedError
+
+
+class ReadBranchGroup(Protocol):
+    async def read_branch_group(self, restaurant_location_id: int) -> int:
+        raise NotImplementedError

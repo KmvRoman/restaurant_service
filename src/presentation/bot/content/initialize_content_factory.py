@@ -16,7 +16,7 @@ from src.presentation.bot.keyboards.inline_keyboard import InlineKeyboard
 from src.presentation.bot.keyboards.reply_keyboard import ReplyKeyboard
 
 
-def initialize_content(user_repo: UserRepository) -> LanguageManager:
+def initialize_content() -> LanguageManager:
     formats = [
         FormatAmount(),
         TextFormat(),
@@ -26,13 +26,13 @@ def initialize_content(user_repo: UserRepository) -> LanguageManager:
         ContentRu(
             language=Language.ru,
             text=RussianText(format=format_manager),
-            inline=RussianInlineKeyboardText(user_repo=user_repo, inline_keyboard=InlineKeyboard()),
+            inline=RussianInlineKeyboardText(inline_keyboard=InlineKeyboard()),
             reply=RussianReplyKeyboardText(reply_keyboard=ReplyKeyboard()),
         ),
         ContentUz(
             language=Language.uz,
             text=UzbekText(format=format_manager),
-            inline=UzbekInlineKeyboardText(user_repo=user_repo, inline_keyboard=InlineKeyboard()),
+            inline=UzbekInlineKeyboardText(inline_keyboard=InlineKeyboard()),
             reply=UzbekReplyKeyboardText(reply_keyboard=ReplyKeyboard()),
         )
     ]

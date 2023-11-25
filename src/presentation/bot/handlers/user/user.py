@@ -1,5 +1,5 @@
 from aiogram import Bot, Router, types, F
-from aiogram.filters import CommandStart, StateFilter, Command
+from aiogram.filters import CommandStart, StateFilter
 from aiogram.fsm.context import FSMContext
 
 from src.application.edit_user_language.dto import UpdateUserLanguageDtoInput
@@ -7,8 +7,7 @@ from src.application.edit_user_name.dto import EditUserNameDtoInput
 from src.application.edit_user_phone.dto import UpdateUserPhoneDtoInput
 from src.application.read_restaurant_data.dto import ReadRestaurantDataDtoInput
 from src.application.read_restaurant_location.dto import ReadLocationDtoInput
-from src.domain.order.constants.order import OrderType
-from src.domain.order.entities.order import Location
+from src.application.read_restaurants.dto import ReadRestaurantsDtoInput
 from src.domain.restaurant.entities.restaurant_view import RestaurantId, LocationId
 from src.domain.user.constants.user import Language
 from src.domain.user.entities.user import User
@@ -18,26 +17,11 @@ from src.presentation.bot.content.text_content.keyboard_content.reply.enums impo
 from src.presentation.bot.states.common.start import StartStates
 from src.presentation.bot.states.user.order import OrderStatePickUp, OrderStateShipping
 
-profile_router = Router()
+profile_router = Router(name="Profile Router")
 
 
 @profile_router.message(CommandStart())
-async def start(message: types.Message, bot: Bot, content: IContent, user: User, restaurant: RestaurantId):
-    await bot.send_message(
-        chat_id=message.from_user.id,
-        text=content.text.show_webapp_button_in_pick_up(address="Адрес ресторана"),
-        reply_markup=content.reply.webapp_input_keyboard(
-            user_id=user.id, restaurant_id=restaurant, user_location=Location(
-                longitude=69.351547, latitude=41.347796,
-            ), language=user.language,
-            restaurant_location_id=1,
-            order_type=OrderType.pickup,
-        ),
-    )
-
-
 @profile_router.message(F.text.in_([i.back for i in Back.__subclasses__()]), StateFilter(StartStates))
-@profile_router.message(Command("st"))
 async def command_start(
         message: types.Message, bot: Bot, content: IContent, state: FSMContext,
 ):
@@ -75,7 +59,7 @@ async def choose_order_type(
 async def get_restaurant_info(
         message: types.Message, bot: Bot,
         ioc: InteractorFactory, user: User,
-        content: IContent, state: FSMContext, restaurant: int,
+        content: IContent, state: FSMContext, restaurant: RestaurantId,
 ):
     restaurant_data = await ioc.read_restaurant_data()
     restaurant_info = await restaurant_data(
@@ -84,10 +68,12 @@ async def get_restaurant_info(
             language=user.language,
         )
     )
+    restaurant_addresses = await ioc.read_restaurants()
+    locations = await restaurant_addresses(data=ReadRestaurantsDtoInput(restaurant_id=restaurant))
     await bot.send_message(
         chat_id=message.from_user.id,
         text=content.text.restaurant_info(name=restaurant_info.name, description=restaurant_info.description),
-        reply_markup=await content.inline.restaurant_info_keyboard(restaurant_id=RestaurantId(restaurant))
+        reply_markup=await content.inline.restaurant_info_keyboard(restaurant_addresses=locations)
     )
     await state.set_state(StartStates.restaurant_location)
 

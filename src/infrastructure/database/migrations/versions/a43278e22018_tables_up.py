@@ -1,8 +1,8 @@
-"""first
+"""tables up
 
-Revision ID: 152e96024f44
+Revision ID: a43278e22018
 Revises: 
-Create Date: 2023-09-26 19:51:58.136099
+Create Date: 2023-11-25 20:23:19.264530
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '152e96024f44'
+revision = 'a43278e22018'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -63,7 +63,7 @@ def upgrade() -> None:
     op.create_table('productdescriptiontable',
     sa.Column('id', sa.BIGINT(), sa.Identity(always=True, cache=1), nullable=False),
     sa.Column('product_id', sa.BIGINT(), nullable=False),
-    sa.Column('description', sa.VARCHAR(length=255), nullable=False),
+    sa.Column('description', sa.VARCHAR(length=500), nullable=False),
     sa.Column('language', sa.Enum('ru', 'uz', name='language'), nullable=False),
     sa.ForeignKeyConstraint(['product_id'], ['producttable.id'], onupdate='CASCADE', ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
@@ -71,14 +71,14 @@ def upgrade() -> None:
     op.create_table('productimagetable',
     sa.Column('id', sa.BIGINT(), sa.Identity(always=True, cache=1), nullable=False),
     sa.Column('product_id', sa.BIGINT(), nullable=False),
-    sa.Column('image', sa.VARCHAR(length=255), nullable=False),
+    sa.Column('image', sa.VARCHAR(length=500), nullable=False),
     sa.ForeignKeyConstraint(['product_id'], ['producttable.id'], onupdate='CASCADE', ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('productnametable',
     sa.Column('id', sa.BIGINT(), sa.Identity(always=True, cache=1), nullable=False),
     sa.Column('product_id', sa.BIGINT(), nullable=False),
-    sa.Column('name', sa.VARCHAR(length=20), nullable=False),
+    sa.Column('name', sa.VARCHAR(length=255), nullable=False),
     sa.Column('language', sa.Enum('ru', 'uz', name='language'), nullable=False),
     sa.ForeignKeyConstraint(['product_id'], ['producttable.id'], onupdate='CASCADE', ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
@@ -90,10 +90,17 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['product_id'], ['producttable.id'], onupdate='CASCADE', ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_table('restaurantbannertable',
+    sa.Column('id', sa.BIGINT(), sa.Identity(always=True, cache=1), nullable=False),
+    sa.Column('restaurant_id', sa.BIGINT(), nullable=False),
+    sa.Column('banner_url', sa.VARCHAR(length=500), nullable=False),
+    sa.ForeignKeyConstraint(['restaurant_id'], ['restauranttable.id'], onupdate='CASCADE', ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id')
+    )
     op.create_table('restaurantlocationstable',
     sa.Column('id', sa.BIGINT(), sa.Identity(always=True, cache=1), nullable=False),
     sa.Column('restaurant_id', sa.BIGINT(), nullable=False),
-    sa.Column('address', sa.VARCHAR(length=20), nullable=False),
+    sa.Column('address', sa.VARCHAR(length=100), nullable=False),
     sa.Column('latitude', sa.Float(), nullable=False),
     sa.Column('longitude', sa.Float(), nullable=False),
     sa.ForeignKeyConstraint(['restaurant_id'], ['restauranttable.id'], onupdate='CASCADE', ondelete='CASCADE'),
@@ -102,8 +109,8 @@ def upgrade() -> None:
     op.create_table('restaurantnamedescriptiontable',
     sa.Column('id', sa.BIGINT(), sa.Identity(always=True, cache=1), nullable=False),
     sa.Column('restaurant_id', sa.BIGINT(), nullable=False),
-    sa.Column('name', sa.VARCHAR(length=50), nullable=False),
-    sa.Column('description', sa.VARCHAR(length=255), nullable=False),
+    sa.Column('name', sa.VARCHAR(length=255), nullable=False),
+    sa.Column('description', sa.VARCHAR(length=500), nullable=False),
     sa.Column('language', sa.Enum('ru', 'uz', name='language'), nullable=False),
     sa.ForeignKeyConstraint(['restaurant_id'], ['restauranttable.id'], onupdate='CASCADE', ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
@@ -120,9 +127,16 @@ def upgrade() -> None:
     op.create_table('categorynametable',
     sa.Column('id', sa.BIGINT(), sa.Identity(always=True, cache=1), nullable=False),
     sa.Column('category_id', sa.BIGINT(), nullable=False),
-    sa.Column('category', sa.VARCHAR(length=30), nullable=False),
+    sa.Column('category', sa.VARCHAR(length=255), nullable=False),
     sa.Column('language', sa.Enum('ru', 'uz', name='language'), nullable=False),
     sa.ForeignKeyConstraint(['category_id'], ['categoriestable.id'], onupdate='CASCADE', ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('grouptable',
+    sa.Column('id', sa.BIGINT(), sa.Identity(always=True, cache=1), nullable=False),
+    sa.Column('restaurant_location_id', sa.BIGINT(), nullable=False),
+    sa.Column('group_id', sa.BIGINT(), nullable=False),
+    sa.ForeignKeyConstraint(['restaurant_location_id'], ['restaurantlocationstable.id'], onupdate='CASCADE', ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('menuproducttable',
@@ -165,7 +179,7 @@ def upgrade() -> None:
     op.create_table('productpricenametable',
     sa.Column('id', sa.BIGINT(), sa.Identity(always=True, cache=1), nullable=False),
     sa.Column('price_id', sa.BIGINT(), nullable=False),
-    sa.Column('name', sa.VARCHAR(length=55), nullable=False),
+    sa.Column('name', sa.VARCHAR(length=100), nullable=False),
     sa.Column('language', sa.Enum('ru', 'uz', name='language'), nullable=False),
     sa.ForeignKeyConstraint(['price_id'], ['productpricetable.id'], onupdate='CASCADE', ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
@@ -173,8 +187,8 @@ def upgrade() -> None:
     op.create_table('shippingordertable',
     sa.Column('id', sa.BIGINT(), sa.Identity(always=True, cache=1), nullable=False),
     sa.Column('order_id', sa.BIGINT(), nullable=False),
-    sa.Column('address', sa.VARCHAR(length=30), nullable=False),
-    sa.Column('comment', sa.VARCHAR(length=50), nullable=False),
+    sa.Column('address', sa.VARCHAR(length=100), nullable=False),
+    sa.Column('comment', sa.VARCHAR(length=255), nullable=False),
     sa.Column('shipping_length', sa.FLOAT(), nullable=False),
     sa.Column('total_amount', sa.BIGINT(), nullable=False),
     sa.ForeignKeyConstraint(['order_id'], ['ordertable.id'], onupdate='CASCADE', ondelete='CASCADE'),
@@ -209,10 +223,12 @@ def downgrade() -> None:
     op.drop_table('productbaskettable')
     op.drop_table('paymenttable')
     op.drop_table('menuproducttable')
+    op.drop_table('grouptable')
     op.drop_table('categorynametable')
     op.drop_table('telegramusertable')
     op.drop_table('restaurantnamedescriptiontable')
     op.drop_table('restaurantlocationstable')
+    op.drop_table('restaurantbannertable')
     op.drop_table('productpricetable')
     op.drop_table('productnametable')
     op.drop_table('productimagetable')

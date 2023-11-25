@@ -64,3 +64,7 @@ class EmptyStopList(ApplicationError):
 
 class UserLocationNotFound(ApplicationError):
     pass
+
+
+class GroupIdCantBeNone(ApplicationError):
+    pass

@@ -2,13 +2,13 @@ from aiogram.types import InlineKeyboardMarkup
 
 from src.application.read_branches.dto import ReadBranchesDtoOutput
 from src.application.read_category_products.dto import CategoryProduct
+from src.application.read_restaurants.dto import ReadRestaurantDtoOutput
 from src.application.read_stop_list.dto import ReadStopListDtoOutput
 from src.domain.order.entities.order import OrderId
 from src.domain.product.constants.product import ProductMode
 from src.domain.restaurant.constants.constants import MenuProductStatus
-from src.domain.restaurant.entities.restaurant_view import RestaurantId, Category
+from src.domain.restaurant.entities.restaurant_view import Category
 from src.domain.user.constants.user import Language
-from src.infrastructure.database.repositories.user_repository import UserRepository
 from src.presentation.bot.content.text_content.keyboard_content.inline.interfaces import (
     IInlineKeyboardText, DefaultInlineButton, UrlInlineButton,
 )
@@ -19,16 +19,14 @@ from src.presentation.bot.states.state_data.product import ProductPriceData
 class RussianInlineKeyboardText(IInlineKeyboardText):
     language = Language.ru
 
-    def __init__(self, user_repo: UserRepository, inline_keyboard: InlineKeyboard):
-        self.user_repo = user_repo
+    def __init__(self, inline_keyboard: InlineKeyboard):
         self.inline_keyboard = inline_keyboard
 
     async def restaurant_info_keyboard(
-            self, restaurant_id: RestaurantId,
+            self, restaurant_addresses: list[ReadRestaurantDtoOutput],
     ) -> InlineKeyboardMarkup:
-        locations = await self.user_repo.read_restaurant_locations(restaurant_id=restaurant_id)
         result = [UrlInlineButton(text="Instagram", url="https://instagram.com/roma1998_1")]
-        for loc in locations:
+        for loc in restaurant_addresses:
             result.append(DefaultInlineButton(text=f"📍 {loc.address}", callback_data=str(loc.id)))
         return self.inline_keyboard.restaurant_info(buttons=result)
 

@@ -1,22 +1,24 @@
 from aiogram import Router, F, types, Bot
-from aiogram.enums import ChatType
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 
 from src.application.accept_order.dto import AcceptOrderDtoInput
 from src.application.common.exceptions import RestaurantLocationIdNotFound
-from src.application.read_current_basket.dto import PreparedBasketProduct
 from src.application.read_order_user.dto import ReadUserOrderDtoInput
 from src.domain.order.entities.order import OrderId
 from src.domain.restaurant.entities.restaurant_view import RestaurantId
+from src.domain.user.constants.user import Language
 from src.domain.user.entities.user import User
 from src.infrastructure.database.repositories.user_repository import UserRepository
 from src.infrastructure.ioc.interfaces import InteractorFactory
 from src.presentation.bot.content.fasade.interfaces import IContent
+from src.presentation.bot.content.format.format_manager import FormatManager
+from src.presentation.bot.content.initialize_content_factory import initialize_content
 from src.presentation.bot.content.text_content.constants import ConcretePaymentTypeRu
 from src.presentation.bot.content.text_content.keyboard_content.reply.enums import (
     ChooseOrderType, Back, Accept, PaymentTypes,
 )
+from src.presentation.bot.content.text_content.ru import RussianText
 from src.presentation.bot.handlers.common.order import create_order_pickup
 from src.presentation.bot.handlers.user.order.order_process.pickup import (
     selected_pickup, get_restaurant_location, get_restaurant_location_by_user_location, exit_webapp_pick_up,
@@ -125,22 +127,28 @@ async def accept_order(message: types.Message, bot: Bot, content: IContent, stat
 
 @pickup.message(F.text.in_([i.cache for i in PaymentTypes.__subclasses__()]), OrderStatePickUp.charge_type)
 async def choose_cache(
-        message: types.Message, bot: Bot, content: IContent,
+        message: types.Message, bot: Bot,
         state: FSMContext, ioc: InteractorFactory, user: User,
 ):
     data = await state.get_data()
+    content = initialize_content()(language=Language.ru)
     order = PickupData(**data.get("pickup_order"))
     order_id = await create_order_pickup(ioc=ioc, user=user, order=order)
     order.order_id = order_id
     await state.update_data(pickup_order=order.model_dump())
+
+    get_group_id = await ioc.read_branch_group()
+    group_id = await get_group_id(restaurant_location_id=order.restaurant_location_id)
+
     await bot.send_message(
-        chat_id=-1001203520922,
+        chat_id=group_id,
         text=content.text.send_order_to_admins_pickup(
             order_id=order_id, products=order.products, first_name=user.name,
             payment_type=ConcretePaymentTypeRu.cache, phone=order.phone, total_amount=order.total_amount,
         ),
         reply_markup=content.inline.accept_order_admin_keyboard_pickup(order_id=order_id),
     )
+    await bot.send_message(chat_id=message.from_user.id, text="", reply_markup=None)
     await state.set_state(OrderStatePickUp.charge_url)
 
 

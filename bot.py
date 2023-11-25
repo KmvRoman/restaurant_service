@@ -44,7 +44,7 @@ async def main():
 
     user_repo = UserRepository(session_or_pool=session_make)
     ioc = IoC(db_gateway=user_repo, redis_cache=redis, config=config)
-    content = initialize_content(user_repo=user_repo)
+    content = initialize_content()
     s3 = S3Client(
         aws_access_key_id=config.s3.aws_access_key_id,
         aws_secret_access_key=config.s3.aws_secret_access_key,
@@ -63,10 +63,6 @@ async def main():
             command="admin",
             description="tap to admin",
         ),
-        BotCommand(
-            command="st",
-            description="command description",
-        ),
     ])
 
     dp.message.filter(CreateUserFilter(), CurrentRestaurant())
@@ -78,7 +74,6 @@ async def main():
     try:
         await dp.start_polling(bot)
     finally:
-        await bot.session.close()
         await engine.dispose()
         await get_connect.aclose()
 

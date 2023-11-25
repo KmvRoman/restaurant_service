@@ -22,6 +22,7 @@ from src.application.read_branches.use_case import ReadRestaurantBranchesCase
 from src.application.read_categories.use_case import ReadCategoriesCase
 from src.application.read_category_products.use_case import ReadCategoryProductsCase
 from src.application.read_current_basket.use_case import ReadCurrentBasketCase
+from src.application.read_group_branch.use_case import ReadBranchGroupCase
 from src.application.read_nearest_location_id.use_case import ReadNearestRestaurantLocation
 from src.application.read_order_admin.use_case import ReadOrderAdminCase
 from src.application.read_order_user.use_case import ReadOrderUserCase
@@ -112,3 +113,6 @@ class InteractorFactory(Protocol):
     async def read_user_location_by_address(self) -> ReadUserLocationByAddressCase: ...
 
     async def read_nearest_restaurant_location_id(self) -> ReadNearestRestaurantLocation: ...
+
+    async def read_branch_group(self) -> ReadBranchGroupCase:
+        raise NotImplementedError
