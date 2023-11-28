@@ -1,5 +1,5 @@
-from src.application.common.interfaces import ReadOrderForUser
+from src.application.common.interfaces import ReadOrderForUser, ReadOrderProductForUser
 
 
-class DbGateway(ReadOrderForUser):
+class DbGateway(ReadOrderForUser, ReadOrderProductForUser):
     pass

@@ -2,7 +2,6 @@ from typing import Protocol
 
 from src.application.accept_order.use_case import AcceptOrderCase
 from src.application.add_product_to_basket.use_case import AddProductToBasketCase
-from src.application.choose_payment_method.use_case import ChoosePaymentMethodCase
 from src.application.create_order.use_case import CreateOrderCase
 from src.application.create_product.use_case import CreateProductCase
 from src.application.create_user.use_case import CreateUserUseCase
@@ -55,8 +54,6 @@ class InteractorFactory(Protocol):
     async def accept_order(self) -> AcceptOrderCase: ...
 
     async def add_product_to_basket(self) -> AddProductToBasketCase: ...
-
-    async def choose_payment_method(self) -> ChoosePaymentMethodCase: ...
 
     async def create_order(self) -> CreateOrderCase: ...
 

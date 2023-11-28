@@ -13,7 +13,7 @@ async def create_order_pickup(
     create_order_case = await ioc.create_order()
     create_order = await create_order_case(data=CreateOrderDtoInput(
         restaurant_location_id=order.restaurant_location_id, user_id=user.id,
-        phone=order.phone, order_type=order.order_type,
+        payment_type=order.payment_type, phone=order.phone, order_type=order.order_type,
         products=[
             ProductOrder(
                 product_id=i.product_id, modification=i.modification,

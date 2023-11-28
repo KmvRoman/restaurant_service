@@ -8,6 +8,7 @@ from src.domain.order.entities.order import OrderId, Location
 @dataclass
 class ReadUserOrderProduct:
     name: str
+    price_name: Optional[str]
     price: int
     count: int
     total_price: int
@@ -16,26 +17,21 @@ class ReadUserOrderProduct:
 @dataclass
 class ReadAdminOrderProduct:
     name: str
+    price_name: Optional[str]
     count: int
 
 
 @dataclass
 class ReadOrderUser:
-    order_type: OrderType
-    phone: str
-    address: Optional[str]
-    comment: Optional[str]
+    order_id: OrderId
     products: list[ReadUserOrderProduct]
     amount: Optional[int]
-    shipping_amount: Optional[int]
-    shipping_length: Optional[float]
     total_cost: int
 
 
 @dataclass
 class ReadOrderAdmin:
     order_id: OrderId
-    order_type: OrderType
     products: list[ReadAdminOrderProduct]
     name: str
     phone: str
@@ -43,5 +39,5 @@ class ReadOrderAdmin:
     address: Optional[str]
     comment: Optional[str]
     location: Optional[Location]
-    shipping_amount: Optional[str]
+    shipping_amount: Optional[int]
     total_cost: int

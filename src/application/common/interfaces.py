@@ -3,7 +3,8 @@ from typing import Protocol
 from src.domain.order.entities.basket import Basket, ProductBasket
 from src.domain.order.entities.basket_view import BasketViewInput
 from src.domain.order.entities.order import OrderId, PickUpOrder, ShippingOrder, Order, Location
-from src.domain.order.entities.order_view import ReadOrderUser, ReadOrderAdmin
+from src.domain.order.entities.order_view import ReadOrderUser, ReadOrderAdmin, ReadAdminOrderProduct, \
+    ReadUserOrderProduct
 from src.domain.product.entities.product import Product, ProductId, ProductName, ProductDescription, ProductPrice
 from src.domain.product.entities.product_view import ProductView, AdminProductsView, ProductAdmin
 from src.domain.restaurant.constants.constants import MenuProductStatus
@@ -147,13 +148,13 @@ class ChoosePaymentMethod(Protocol):
         raise NotImplementedError
 
 
-class GetOrder(Protocol):
-    async def get_order(self, order_id: OrderId) -> ShippingOrder | PickUpOrder:
+class ExistOrder(Protocol):
+    async def exist_order(self, order_id: OrderId) -> bool:
         raise NotImplementedError
 
 
 class AcceptOrder(Protocol):
-    async def accept_order(self, order: Order) -> None:
+    async def accept_order(self, order_id: OrderId) -> None:
         raise NotImplementedError
 
 
@@ -206,8 +207,18 @@ class ReadOrderForUser(Protocol):
         raise NotImplementedError
 
 
+class ReadOrderProductForUser(Protocol):
+    async def read_user_order_product(self, order_id: OrderId, language: Language) -> list[ReadUserOrderProduct]:
+        raise NotImplementedError
+
+
 class ReadOrderForAdmin(Protocol):
-    async def read_order_admin(self, order_id: OrderId, language: Language) -> ReadOrderAdmin:
+    async def read_order_admin(self, order_id: OrderId) -> ReadOrderAdmin:
+        raise NotImplementedError
+
+
+class ReadOrderProductForAdmin(Protocol):
+    async def read_admin_order_product(self, order_id: OrderId, language: Language) -> list[ReadAdminOrderProduct]:
         raise NotImplementedError
 
 

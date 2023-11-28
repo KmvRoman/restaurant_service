@@ -12,10 +12,9 @@ class AcceptOrderCase(UseCase[AcceptOrderDtoInput, AcceptOrderDtoOutput]):
         self.order_service = order_service
 
     async def __call__(self, data: AcceptOrderDtoInput) -> AcceptOrderDtoOutput:
-        order = await self.db_gateway.get_order(order_id=data.order_id)
+        order = await self.db_gateway.exist_order(order_id=data.order_id)
         if order is None:
             raise OrderNotFound
-        self.order_service.accept_order(order=order)
-        user_id = await self.db_gateway.accept_order(order=order)
+        user_id = await self.db_gateway.accept_order(order_id=data.order_id)
         await self.db_gateway.commit()
         return AcceptOrderDtoOutput(user_id=UserId(int(user_id)))

@@ -17,7 +17,7 @@ class CreateOrderCase(UseCase[CreateOrderDtoInput, CreateOrderDtoOutput]):
         if restaurant_location is None:
             raise RestaurantLocationNotFound
         order = self.order_service.create_order(
-            user_id=data.user_id, phone=data.phone,
+            user_id=data.user_id, phone=data.phone, payment_type=data.payment_type,
             order_type=data.order_type, products=data.products,
             location=data.location, address=data.address,
             comment=data.comment, shipping_length=data.shipping_length,

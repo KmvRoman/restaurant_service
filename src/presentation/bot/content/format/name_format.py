@@ -1,5 +1,5 @@
 from src.application.read_current_basket.dto import PreparedBasketProduct
-from src.domain.user.constants.user import Language
+from src.domain.order.entities.order_view import ReadAdminOrderProduct, ReadUserOrderProduct
 from src.presentation.bot.content.content_enums import ExistingTypes
 from src.presentation.bot.content.text_content.interfaces import IFormat
 from src.presentation.bot.states.state_data.product import ProductNameData, ProductDescriptionData, ProductPriceData
@@ -71,11 +71,30 @@ class TextFormat(IFormat):
                 )
         return string
 
-    def format_products_view_admin(self, products: list[PreparedBasketProduct]) -> str:
+    def format_products_view_admin(self, products: list[ReadAdminOrderProduct]) -> str:
         string = ""
         for product in products:
-            if product.modification is None:
+            if product.price_name is None:
                 string += f"\n{product.name} — {product.count} шт."
             else:
-                string += f"\n{product.name} ({product.price_name}) шт."
+                string += f"\n{product.name} ({product.price_name}) — {product.count} шт."
+        return string
+
+    def format_products_view_user(self, products: list[ReadUserOrderProduct], currency_name: str) -> str:
+        string = ""
+        for product in products:
+            if product.price_name is None:
+                string += (
+                    f"\n<b>{product.name}</b>\n"
+                    f"{self.number_to_emoji(number=product.count)} ✖️ "
+                    f"{self.format_product_price(obj=product.price)} — "
+                    f"<b>{self.format_product_price(obj=product.price * product.count)} {currency_name}</b>"
+                )
+            else:
+                string += (
+                    f"\n<b>{product.name}</b> ({product.price_name})\n"
+                    f"{self.number_to_emoji(number=product.count)} ✖️ "
+                    f"{self.format_product_price(obj=product.price)} — "
+                    f"<b>{self.format_product_price(obj=product.price * product.count)} {currency_name}</b>"
+                )
         return string

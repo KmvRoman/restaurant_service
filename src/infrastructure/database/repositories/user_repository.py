@@ -6,12 +6,16 @@ from src.domain.order.constants.order import OrderStatus
 from src.domain.order.entities.basket import Basket, ProductBasket
 from src.domain.order.entities.basket_view import BasketViewInput
 from src.domain.order.entities.order import Location, PickUpOrder, OrderId, ShippingOrder, ProductOrder, Order
+from src.domain.order.entities.order_view import ReadOrderAdmin, ReadAdminOrderProduct, ReadOrderUser, \
+    ReadUserOrderProduct
 from src.domain.product.constants.product import ProductStatus
 from src.domain.product.entities.product import ProductId, Product, ProductName, ProductDescription, ProductPrice
 from src.domain.product.entities.product_view import ProductView, AdminProductsView, ProductAdmin
 from src.domain.restaurant.constants.constants import MenuProductStatus
-from src.domain.restaurant.entities.restaurant_view import RestaurantId, RestaurantLocation, LocationId, RestaurantView, \
-    Category, CategoryId, ReadRestaurantBranches, MenuProduct
+from src.domain.restaurant.entities.restaurant_view import (
+    RestaurantId, RestaurantLocation, LocationId, RestaurantView,
+    Category, CategoryId, ReadRestaurantBranches, MenuProduct,
+)
 from src.domain.restaurant.entities.stop_list_view import StopList
 from src.domain.user.constants.user import Language, Member
 from src.domain.user.entities.user import User, UserId
@@ -22,13 +26,15 @@ from src.infrastructure.database import (
     ProductBasketModificationTable, CategoriesTable, CategoryNameTable,
     RestaurantBannerTable, RestaurantTable, RestaurantNameDescriptionTable,
     ShippingOrderTable, OrderTable, ShippingLocationTable, ProductOrderTable,
-    PaymentTable, GroupTable,
+    GroupTable,
 )
 from src.infrastructure.database.enums import TelegramStatus
 from src.infrastructure.database.exceptions.product import (
     ModificationSelectedError, ProductNotFound, UserNotFoundDbError,
 )
 from src.infrastructure.database.repositories.base import BaseRepository
+from src.infrastructure.database.serialize.serialize_functions.order import serialize_admin_order, \
+    serialize_admin_product, serialize_user_order, serialize_user_product
 from src.infrastructure.database.serialize.serialize_functions.product import (
     serialize_products, serialize_basket, serialize_basket_view,
     serialize_admin_category_products, show_product_admin, show_product_core,
@@ -586,7 +592,7 @@ class UserRepository(BaseRepository):
     async def create_pick_up_order(self, order: PickUpOrder) -> OrderId:
         create_order = OrderTable(
             user_id=order.user_id, phone=order.phone, order_type=order.order_type,
-            amount=order.amount, status=order.status,
+            amount=order.amount, payment_type=order.payment_type, status=order.status,
         )
         self.session.add(create_order)
         await self.session.flush()
@@ -596,7 +602,7 @@ class UserRepository(BaseRepository):
     async def create_shipping_order(self, order: ShippingOrder) -> OrderId:
         create_order = OrderTable(
             user_id=order.user_id, phone=order.phone, order_type=order.order_type,
-            amount=order.amount, status=order.status,
+            amount=order.amount, payment_type=order.payment_type, status=order.status,
         )
         self.session.add(create_order)
         await self.session.flush()
@@ -618,14 +624,16 @@ class UserRepository(BaseRepository):
         for product in products:
             add_product = ProductOrderTable(
                 order_id=order_id, product_id=product.product_id,
+                modification=0 if product.modification is None else product.modification,
                 count=product.count, price=product.price,
             )
             self.session.add(add_product)
 
-    async def accept_order(self, order: Order) -> UserId:
+    async def accept_order(self, order_id: OrderId) -> UserId:
         stmt = update(
             OrderTable
-        ).where(OrderTable.id == order.id).values({OrderTable.status: OrderStatus.accepted}).returning(OrderTable.user_id)
+        ).where(OrderTable.id == order_id).values({OrderTable.status: OrderStatus.accepted}).returning(
+            OrderTable.user_id)
         result = (await self.session.execute(stmt)).scalars().first()
         return result
 
@@ -633,19 +641,92 @@ class UserRepository(BaseRepository):
         stmt = select(TelegramUserTable.telegram_id, UserTable.language).join(
             UserTable, TelegramUserTable.user_id == UserTable.id
         ).where(TelegramUserTable.user_id == user_id)
-        result = (await self.session.execute(stmt)).scalars().first()
+        result = (await self.session.execute(stmt)).first()
         return result
 
-    async def get_order(self, order_id: OrderId) -> ShippingOrder | PickUpOrder | None:
-        stmt = select(
-            OrderTable.id, OrderTable.user_id, OrderTable.phone, PaymentTable.payment_type,
-            OrderTable.order_type, ProductOrderTable.product_id,
-            ProductOrderTable.modification, OrderTable.amount, OrderTable.status,
-            ShippingOrderTable.total_amount, ShippingLocationTable.latitude, ShippingLocationTable.longitude,
-            ShippingOrderTable.address, ShippingOrderTable.comment,ShippingOrderTable.shipping_length,
-        ).where(OrderTable.id == order_id)
+    async def exist_order(self, order_id: OrderId) -> bool:
+        stmt = select(OrderTable.id).where(OrderTable.id == order_id)
+        result = (await self.session.execute(stmt)).scalars().first()
+        if result is None:
+            return False
+        return True
 
     async def read_branch_group(self, restaurant_location_id: int) -> int:
         stmt = select(GroupTable.group_id).where(GroupTable.restaurant_location_id == restaurant_location_id)
         group_id = (await self.session.execute(stmt)).scalars().first()
         return group_id
+
+    async def read_order_admin(self, order_id: OrderId) -> ReadOrderAdmin | None:
+        stmt = select(
+            OrderTable.id, UserTable.name, UserTable.phone, OrderTable.payment_type, ShippingOrderTable.address,
+            ShippingOrderTable.comment, ShippingLocationTable.longitude, ShippingLocationTable.latitude,
+            OrderTable.amount, ShippingOrderTable.total_amount,
+        ).select_from(
+            OrderTable
+        ).join(
+            UserTable, OrderTable.user_id == UserTable.id
+        ).outerjoin(
+            ShippingOrderTable, OrderTable.id == ShippingOrderTable.order_id
+        ).outerjoin(
+            ShippingLocationTable, ShippingOrderTable.id == ShippingLocationTable.shipping_id
+        ).join(
+            ProductOrderTable, OrderTable.id == ProductOrderTable.order_id,
+        ).where(OrderTable.id == order_id)
+        result = (await self.session.execute(stmt)).first()
+        if result is None:
+            return None
+        return serialize_admin_order(payload=result)
+
+    async def read_admin_order_product(self, order_id: OrderId, language: Language) -> list[ReadAdminOrderProduct]:
+        stmt = select(ProductNameTable.name, ProductPriceNameTable.name, ProductOrderTable.count).select_from(
+            ProductOrderTable
+        ).join(
+            ProductNameTable, ProductOrderTable.product_id == ProductNameTable.product_id
+        ).outerjoin(
+            ProductPriceNameTable, ProductOrderTable.modification == ProductPriceNameTable.price_id
+        ).where(
+            ProductNameTable.language == language,
+            case(
+                (ProductPriceNameTable.language.is_not(None), ProductPriceNameTable.language == language),
+                else_=True,
+            ),
+            ProductOrderTable.order_id == order_id,
+        )
+        result = (await self.session.execute(stmt)).all()
+        return serialize_admin_product(payload=result)
+
+    async def read_order_user(self, order_id: OrderId) -> ReadOrderUser | None:
+        stmt = select(
+            OrderTable.id, OrderTable.amount, ShippingOrderTable.total_amount,
+        ).select_from(OrderTable).outerjoin(
+            ShippingOrderTable, OrderTable.id == ShippingOrderTable.order_id
+        ).where(OrderTable.id == order_id)
+        result = (await self.session.execute(stmt)).first()
+        if result is None:
+            return None
+        return serialize_user_order(payload=result)
+
+    async def read_user_order_product(self, order_id: OrderId, language: Language) -> list[ReadUserOrderProduct]:
+        stmt = select(
+            ProductNameTable.name, ProductPriceNameTable.name,
+            ProductPriceTable.price, ProductOrderTable.count,
+        ).select_from(ProductOrderTable).join(
+            ProductNameTable, ProductOrderTable.product_id == ProductNameTable.product_id
+        ).join(
+            ProductPriceTable,
+            case(
+                (ProductOrderTable.modification != 0, ProductOrderTable.modification == ProductPriceTable.id),
+                else_=ProductOrderTable.product_id == ProductPriceTable.product_id,
+            ),
+        ).outerjoin(
+            ProductPriceNameTable, ProductOrderTable.modification == ProductPriceNameTable.price_id
+        ).where(
+            ProductNameTable.language == language,
+            case(
+                (ProductPriceNameTable.language.is_not(None), ProductPriceNameTable.language == language),
+                else_=True,
+            ),
+            ProductOrderTable.order_id == order_id,
+        )
+        result = (await self.session.execute(stmt)).all()
+        return serialize_user_product(payload=result)

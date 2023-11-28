@@ -4,7 +4,9 @@ from aiogram.fsm.context import FSMContext
 
 from src.application.accept_order.dto import AcceptOrderDtoInput
 from src.application.common.exceptions import RestaurantLocationIdNotFound
+from src.application.read_order_admin.dto import ReadAdminOrderDtoInput
 from src.application.read_order_user.dto import ReadUserOrderDtoInput
+from src.domain.order.constants.order import PaymentType
 from src.domain.order.entities.order import OrderId
 from src.domain.restaurant.entities.restaurant_view import RestaurantId
 from src.domain.user.constants.user import Language
@@ -127,28 +129,37 @@ async def accept_order(message: types.Message, bot: Bot, content: IContent, stat
 
 @pickup.message(F.text.in_([i.cache for i in PaymentTypes.__subclasses__()]), OrderStatePickUp.charge_type)
 async def choose_cache(
-        message: types.Message, bot: Bot,
+        message: types.Message, bot: Bot, content: IContent,
         state: FSMContext, ioc: InteractorFactory, user: User,
 ):
     data = await state.get_data()
-    content = initialize_content()(language=Language.ru)
+    admin_content = initialize_content()(language=Language.ru)
     order = PickupData(**data.get("pickup_order"))
+    order.payment_type = PaymentType.cache
     order_id = await create_order_pickup(ioc=ioc, user=user, order=order)
     order.order_id = order_id
     await state.update_data(pickup_order=order.model_dump())
-
     get_group_id = await ioc.read_branch_group()
     group_id = await get_group_id(restaurant_location_id=order.restaurant_location_id)
 
+    get_order_for_admin = await ioc.read_order_admin()
+    admin_order = await get_order_for_admin(data=ReadAdminOrderDtoInput(order_id=order_id, language=Language.ru))
     await bot.send_message(
         chat_id=group_id,
-        text=content.text.send_order_to_admins_pickup(
-            order_id=order_id, products=order.products, first_name=user.name,
-            payment_type=ConcretePaymentTypeRu.cache, phone=order.phone, total_amount=order.total_amount,
+        text=admin_content.text.send_order_to_admins_pickup(
+            order_id=admin_order.order_id, first_name=admin_order.name,
+            payment_type=ConcretePaymentTypeRu.cache, phone=admin_order.phone, total_amount=admin_order.total_cost,
+            products=admin_order.products,
         ),
-        reply_markup=content.inline.accept_order_admin_keyboard_pickup(order_id=order_id),
+        reply_markup=admin_content.inline.accept_order_admin_keyboard_pickup(order_id=order_id),
     )
-    await bot.send_message(chat_id=message.from_user.id, text="", reply_markup=None)
+
+    get_order_user = await ioc.read_order_user()
+    user_order = await get_order_user(data=ReadUserOrderDtoInput(order_id=order_id, language=user.language))
+
+    await bot.send_message(chat_id=message.from_user.id, text=content.text.send_finish_order_presentation_pickup(
+        order_id=order_id, products=user_order.products, total_amount=user_order.total_cost,
+    ), reply_markup=content.reply.users_main_menu())
     await state.set_state(OrderStatePickUp.charge_url)
 
 
@@ -187,16 +198,3 @@ async def accept_pickup_order_from_admin(
     accept_order_case = await ioc.accept_order()
     acc_order = await accept_order_case(data=AcceptOrderDtoInput(order_id=order_id))
     telegram_id, language = await user_repo.telegram_id_from_user_id(user_id=acc_order.user_id)
-    read_order_case = await ioc.read_order_user()
-    order = await read_order_case(data=ReadUserOrderDtoInput(order_id=order_id, language=language))
-    await bot.send_message(
-        chat_id=telegram_id,
-        text=content.text.send_finish_order_presentation_pickup(
-            order_id=order_id, products=order.products, total_amount=order.total_cost,
-        ),
-    )
-
-
-@pickup.callback_query(F.data.startswith("adp_"))
-async def dd(call: types.CallbackQuery):
-    print(call.data)

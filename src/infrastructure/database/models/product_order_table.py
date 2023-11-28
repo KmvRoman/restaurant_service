@@ -16,5 +16,6 @@ class ProductOrderTable(Base):
         ForeignKey(column="producttable.id", ondelete="CASCADE", onupdate="CASCADE"),
         nullable=False,
     )
+    modification: Mapped[int] = mapped_column(BIGINT, nullable=False)
     count: Mapped[int] = mapped_column(INTEGER, nullable=False)
     price: Mapped[int] = mapped_column(BIGINT, nullable=False)

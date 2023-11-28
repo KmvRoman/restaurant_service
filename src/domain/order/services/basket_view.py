@@ -3,7 +3,10 @@ from src.domain.order.entities.basket_view import BasketViewInput, BasketViewOut
 
 
 class BasketViewService:
-    def current_basket(self, basket: BasketViewInput, shipping_amount: int | None, order_type: OrderType) -> BasketViewOutput:
+    def current_basket(
+            self, basket: BasketViewInput, shipping_amount: int | None,
+            order_type: OrderType,
+    ) -> BasketViewOutput:
         prepared = []
         amount = 0
         for pr in basket.prepared:

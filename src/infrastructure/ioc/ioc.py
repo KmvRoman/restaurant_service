@@ -1,6 +1,5 @@
 from src.application.accept_order.use_case import AcceptOrderCase
 from src.application.add_product_to_basket.use_case import AddProductToBasketCase
-from src.application.choose_payment_method.use_case import ChoosePaymentMethodCase
 from src.application.create_order.use_case import CreateOrderCase
 from src.application.create_product.use_case import CreateProductCase
 from src.application.create_user.use_case import CreateUserUseCase
@@ -83,9 +82,6 @@ class IoC(InteractorFactory):
 
     async def add_product_to_basket(self) -> AddProductToBasketCase:
         return AddProductToBasketCase(db_gateway=self.db_gateway, basket_service=self.basket_service)
-
-    async def choose_payment_method(self) -> ChoosePaymentMethodCase:
-        return ChoosePaymentMethodCase(db_gateway=self.db_gateway, order_service=self.order_service)
 
     async def create_order(self) -> CreateOrderCase:
         return CreateOrderCase(

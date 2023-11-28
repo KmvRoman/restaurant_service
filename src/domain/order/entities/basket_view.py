@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 from src.domain.order.constants.order import OrderType
+from src.domain.order.entities.order import OrderId
 from src.domain.product.entities.product import ProductId
 from src.domain.user.entities.user import UserId
 
@@ -43,4 +44,3 @@ class BasketViewOutput:
     shipping_amount: Optional[int]
     amount: int
     total_amount: int
-

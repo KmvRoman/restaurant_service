@@ -2,7 +2,7 @@ from typing import Protocol, Optional
 
 from src.application.read_current_basket.dto import PreparedBasketProduct
 from src.domain.order.entities.order import OrderId, Location
-from src.domain.order.entities.order_view import ReadUserOrderProduct
+from src.domain.order.entities.order_view import ReadAdminOrderProduct, ReadUserOrderProduct
 from src.domain.product.constants.product import ProductMode
 from src.domain.product.entities.product import ProductName, ProductDescription
 from src.domain.product.entities.product_view import AdminProductPrice
@@ -10,7 +10,9 @@ from src.domain.restaurant.constants.constants import MenuProductStatus
 from src.domain.user.constants.user import Language
 from src.presentation.bot.content.content_enums import ExistingTypes
 from src.presentation.bot.content.text_content.constants import ConcretePaymentType
-from src.presentation.bot.states.state_data.product import ProductNameData, ProductDescriptionData, ProductPriceData
+from src.presentation.bot.states.state_data.product import (
+    ProductNameData, ProductDescriptionData, ProductPriceData,
+)
 
 
 class IText(Protocol):
@@ -189,13 +191,13 @@ class IText(Protocol):
         raise NotImplementedError
 
     def send_order_to_admins_pickup(
-            self, order_id: OrderId, products: list[PreparedBasketProduct],
+            self, order_id: OrderId, products: list[ReadAdminOrderProduct],
             first_name: str, phone: str, payment_type: ConcretePaymentType, total_amount: int,
     ):
         raise NotImplementedError
 
     def send_order_to_admins_shipping(
-            self, order_id: OrderId, products: list[PreparedBasketProduct],
+            self, order_id: OrderId, products: list[ReadAdminOrderProduct],
             first_name: str, phone: str, payment_type: ConcretePaymentType, address: str, comment: str,
             shipping_amount: int, total_amount: int, user_location: Location,
     ):

@@ -1,8 +1,8 @@
-"""tables up
+"""delete table payment table
 
-Revision ID: a43278e22018
+Revision ID: f5ad7e3a6b6a
 Revises: 
-Create Date: 2023-11-25 20:23:19.264530
+Create Date: 2023-11-28 17:40:27.615947
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'a43278e22018'
+revision = 'f5ad7e3a6b6a'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -56,6 +56,7 @@ def upgrade() -> None:
     sa.Column('phone', sa.VARCHAR(length=13), nullable=False),
     sa.Column('order_type', sa.Enum('shipping', 'pickup', name='ordertype'), nullable=False),
     sa.Column('amount', sa.BIGINT(), nullable=False),
+    sa.Column('payment_type', sa.Enum('cache', 'card', name='paymenttype'), nullable=False),
     sa.Column('status', sa.Enum('waiting', 'paid', 'accepted', name='orderstatus'), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['usertable.id'], onupdate='CASCADE', ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
@@ -150,13 +151,6 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['product_id'], ['producttable.id'], onupdate='CASCADE', ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_table('paymenttable',
-    sa.Column('id', sa.BIGINT(), sa.Identity(always=True, cache=1), nullable=False),
-    sa.Column('order_id', sa.BIGINT(), nullable=False),
-    sa.Column('payment_type', sa.Enum('cache', 'card', name='paymenttype'), nullable=False),
-    sa.ForeignKeyConstraint(['order_id'], ['ordertable.id'], onupdate='CASCADE', ondelete='CASCADE'),
-    sa.PrimaryKeyConstraint('id')
-    )
     op.create_table('productbaskettable',
     sa.Column('id', sa.BIGINT(), sa.Identity(always=True, cache=1), nullable=False),
     sa.Column('basket_id', sa.BIGINT(), nullable=False),
@@ -170,6 +164,7 @@ def upgrade() -> None:
     sa.Column('id', sa.BIGINT(), sa.Identity(always=True, cache=1), nullable=False),
     sa.Column('order_id', sa.BIGINT(), nullable=False),
     sa.Column('product_id', sa.BIGINT(), nullable=False),
+    sa.Column('modification', sa.BIGINT(), nullable=False),
     sa.Column('count', sa.INTEGER(), nullable=False),
     sa.Column('price', sa.BIGINT(), nullable=False),
     sa.ForeignKeyConstraint(['order_id'], ['ordertable.id'], onupdate='CASCADE', ondelete='CASCADE'),
@@ -221,7 +216,6 @@ def downgrade() -> None:
     op.drop_table('productpricenametable')
     op.drop_table('productordertable')
     op.drop_table('productbaskettable')
-    op.drop_table('paymenttable')
     op.drop_table('menuproducttable')
     op.drop_table('grouptable')
     op.drop_table('categorynametable')

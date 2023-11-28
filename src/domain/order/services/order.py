@@ -11,13 +11,13 @@ class OrderService:
     shipping_price_per_kilometer = 1250
 
     def create_order(
-            self, user_id: UserId, phone: str, order_type: OrderType,
+            self, user_id: UserId, payment_type: PaymentType, phone: str, order_type: OrderType,
             products: list[ProductOrder], location: Optional[Location],
             address: Optional[str], comment: Optional[str], shipping_length: Optional[float],
     ) -> ShippingOrder | PickUpOrder:
         if order_type == OrderType.shipping:
             return ShippingOrder(
-                id=None, user_id=user_id, phone=phone, payment_type=None,
+                id=None, user_id=user_id, phone=phone, payment_type=payment_type,
                 order_type=order_type, products=products,
                 amount=self.calculate_amount(products=products), status=OrderStatus.waiting, location=location,
                 address=address, comment=comment, shipping_length=shipping_length,
@@ -25,7 +25,7 @@ class OrderService:
             )
         else:
             return PickUpOrder(
-                id=None, user_id=user_id, phone=phone, payment_type=None,
+                id=None, user_id=user_id, phone=phone, payment_type=payment_type,
                 order_type=order_type, products=products, amount=self.calculate_amount(products=products),
                 status=OrderStatus.waiting, total_amount=self.calculate_amount(products=products),
             )

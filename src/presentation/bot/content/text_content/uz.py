@@ -117,7 +117,7 @@ class UzbekText(IText):
     ) -> str:
         return (
             f"Ваш заказ принят, ориентировочное время готовности 20 минут. Номер вашего заказа #{order_id}.\n"
-            f"{self.format(ExistingTypes.Text).format_products_view(products=products, currency_name='сум')}"
+            f"{self.format(ExistingTypes.Text).format_products_view_user(products=products, currency_name='сум')}"
             f"\n\n<b>Итого  — {total_amount} сум</b>\n\nХорошего дня!"
         )
 
@@ -127,7 +127,7 @@ class UzbekText(IText):
     ) -> str:
         return (
             f"Ваш заказ принят, ориентировочное время готовности 20 минут. Номер вашего заказа #{order_id}.\n"
-            f"{self.format(ExistingTypes.Text).format_products_view(products=products, currency_name='сум')}"
+            f"{self.format(ExistingTypes.Text).format_products_view_user(products=products, currency_name='сум')}"
             f"\n\nСтоимость доставки — {self.format(ExistingTypes.Text).format_product_price(shipping_amount)} сум"
             f"\n<b>Итого  — {self.format(ExistingTypes.Text).format_product_price(total_amount)} сум</b>"
             f"\n\nХорошего дня!"

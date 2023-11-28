@@ -19,6 +19,5 @@ from .models.restaurant_table import RestaurantTable
 from .models.restaurant_name_table import RestaurantNameDescriptionTable
 from .models.shipping_location_table import ShippingLocationTable
 from .models.shipping_order import ShippingOrderTable
-from .models.payment_table import PaymentTable
 from .models.restaurant_banner_table import RestaurantBannerTable
 from .models.group_table import GroupTable

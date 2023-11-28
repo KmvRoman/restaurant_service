@@ -16,7 +16,6 @@ class ReadAdminOrderDtoInput:
 @dataclass
 class ReadAdminOrderDtoOutput:
     order_id: OrderId
-    order_type: OrderType
     products: list[ReadAdminOrderProduct]
     name: str
     phone: str

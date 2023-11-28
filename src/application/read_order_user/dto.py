@@ -15,12 +15,7 @@ class ReadUserOrderDtoInput:
 
 @dataclass
 class ReadUserOrderDtoOutput:
-    order_type: OrderType
-    phone: str
-    address: Optional[str]
-    comment: Optional[str]
+    order_id: OrderId
     products: list[ReadUserOrderProduct]
     amount: Optional[int]
-    shipping_amount: Optional[int]
-    shipping_length: Optional[float]
     total_cost: int

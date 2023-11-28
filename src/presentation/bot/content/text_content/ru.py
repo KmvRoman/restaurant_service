@@ -3,6 +3,7 @@ from typing import Optional
 from src.application.read_current_basket.dto import PreparedBasketProduct
 from src.domain.order.constants.order import OrderType
 from src.domain.order.entities.order import OrderId, Location
+from src.domain.order.entities.order_view import ReadAdminOrderProduct, ReadUserOrderProduct
 from src.domain.product.constants.product import ProductMode
 from src.domain.product.entities.product import ProductName, ProductDescription
 from src.domain.product.entities.product_view import AdminProductPrice
@@ -262,31 +263,31 @@ class RussianText(IText):
         return "✅ Оплата прошла успешно"
 
     def send_finish_order_presentation_pickup(
-            self, order_id: OrderId, products: list[PreparedBasketProduct],
+            self, order_id: OrderId, products: list[ReadUserOrderProduct],
             total_amount: int,
     ) -> str:
         return (
             f"Ваш заказ принят, ориентировочное время готовности 20 минут. Номер вашего заказа #{order_id}.\n"
-            f"{self.format(ExistingTypes.Text).format_products_view(products=products, currency_name='сум')}"
+            f"{self.format(ExistingTypes.Text).format_products_view_user(products=products, currency_name='сум')}"
             f"\n\n<b>Итого  — {self.format(ExistingTypes.Text).format_product_price(total_amount)} сум</b>"
             f"\n\nХорошего дня!"
         )
 
     def send_finish_order_presentation_shipping(
-            self, order_id: OrderId, products: list[PreparedBasketProduct],
+            self, order_id: OrderId, products: list[ReadUserOrderProduct],
             shipping_amount: int, total_amount: int,
     ) -> str:
         return (
             f"Ваш заказ принят, ориентировочное время готовности 20 минут. Номер вашего заказа #{order_id}.\n"
-            f"{self.format(ExistingTypes.Text).format_products_view(products=products, currency_name='сум')}"
+            f"{self.format(ExistingTypes.Text).format_products_view_user(products=products, currency_name='сум')}"
             f"\n\nСтоимость доставки — {self.format(ExistingTypes.Text).format_product_price(shipping_amount)} сум"
             f"\n<b>Итого  — {self.format(ExistingTypes.Text).format_product_price(total_amount)} сум</b>"
             f"\n\nХорошего дня!"
         )
 
     def send_order_to_admins_pickup(
-            self, order_id: OrderId, products: list[PreparedBasketProduct],
-            first_name: str, phone: str, payment_type: type[ConcretePaymentTypeRu], total_amount: int,
+            self, order_id: OrderId, products: list[ReadAdminOrderProduct],
+            first_name: str, phone: str, payment_type: ConcretePaymentType, total_amount: int,
     ):
         return (
             f"<b>Заказ #{order_id}</b> — 🚶 Самовывоз\n"
@@ -298,7 +299,7 @@ class RussianText(IText):
         )
 
     def send_order_to_admins_shipping(
-            self, order_id: OrderId, products: list[PreparedBasketProduct],
+            self, order_id: OrderId, products: list[ReadAdminOrderProduct],
             first_name: str, phone: str, payment_type: type[ConcretePaymentTypeRu], address: str, comment: str,
             shipping_amount: int, total_amount: int, user_location: Location,
     ):
