@@ -203,6 +203,15 @@ class IText(Protocol):
     ):
         raise NotImplementedError
 
+    def accept_order_pickup_by_admin(self, order_id: OrderId) -> str:
+        raise NotImplementedError
+
+    def accept_order_shipping_by_admin(self, order_id: OrderId) -> str:
+        raise NotImplementedError
+
+    def wrong_phone_number(self) -> str:
+        raise NotImplementedError
+
 
 class IFormat(Protocol):
     format: ExistingTypes

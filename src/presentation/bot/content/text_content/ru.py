@@ -314,3 +314,14 @@ class RussianText(IText):
             f"<b>Сумма заказа:</b> {self.format(ExistingTypes.Text).format_product_price(total_amount)} сум\n\n"
             f"<b>Доставка:</b> {self.format(ExistingTypes.Text).format_product_price(shipping_amount)} сум"
         )
+
+    def accept_order_pickup_by_admin(self, order_id: OrderId) -> str:
+        return (f"Заказ #{order_id} в процессе приготовления. "
+                f"Ориентировочное время готовности 20 минут.")
+
+    def accept_order_shipping_by_admin(self, order_id: OrderId) -> str:
+        return f"Ваш заказ принят и будет отправлен в указанный срок. Номер вашего заказа #{order_id}."
+
+    def wrong_phone_number(self) -> str:
+        return ("⛔️ Неверно введен номер телефона, попробуйте снова. "
+                "Отправьте или введите ваш номер телефона\nв формате: +998** *** ** **")

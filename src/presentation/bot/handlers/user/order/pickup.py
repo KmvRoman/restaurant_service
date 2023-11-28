@@ -1,9 +1,12 @@
+from contextlib import suppress
+
+from aiogram.exceptions import TelegramBadRequest
 from aiogram import Router, F, types, Bot
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 
 from src.application.accept_order.dto import AcceptOrderDtoInput
-from src.application.common.exceptions import RestaurantLocationIdNotFound
+from src.application.common.exceptions import RestaurantLocationIdNotFound, RestaurantLocationNotFound
 from src.application.read_order_admin.dto import ReadAdminOrderDtoInput
 from src.application.read_order_user.dto import ReadUserOrderDtoInput
 from src.domain.order.constants.order import PaymentType
@@ -14,13 +17,12 @@ from src.domain.user.entities.user import User
 from src.infrastructure.database.repositories.user_repository import UserRepository
 from src.infrastructure.ioc.interfaces import InteractorFactory
 from src.presentation.bot.content.fasade.interfaces import IContent
-from src.presentation.bot.content.format.format_manager import FormatManager
 from src.presentation.bot.content.initialize_content_factory import initialize_content
 from src.presentation.bot.content.text_content.constants import ConcretePaymentTypeRu
 from src.presentation.bot.content.text_content.keyboard_content.reply.enums import (
     ChooseOrderType, Back, Accept, PaymentTypes,
 )
-from src.presentation.bot.content.text_content.ru import RussianText
+from src.presentation.bot.content.text_content.validation.phone_number_validation import validate_phone_number
 from src.presentation.bot.handlers.common.order import create_order_pickup
 from src.presentation.bot.handlers.user.order.order_process.pickup import (
     selected_pickup, get_restaurant_location, get_restaurant_location_by_user_location, exit_webapp_pick_up,
@@ -79,6 +81,7 @@ async def get_location(
     StateFilter(OrderStatePickUp.accept_order, OrderStatePickUp.charge_type),
 )
 @pickup.message(F.text == "pickup", OrderStatePickUp.send_location)  # TODO replace with real pickup handler
+@pickup.message(F.web_app_data)
 async def webapp_exit(
         message: types.Message, bot: Bot, content: IContent, state: FSMContext,
         ioc: InteractorFactory, user: User,
@@ -92,7 +95,10 @@ async def webapp_exit(
 async def get_phone_number_from_text(message: types.Message, bot: Bot, content: IContent, state: FSMContext):
     data = await state.get_data()
     order = PickupData(**data.get("pickup_order"))
-    order.phone = message.text  # TODO validate phone number
+    if not validate_phone_number(phone=message.text):
+        await bot.send_message(chat_id=message.from_user.id, text=content.text.wrong_phone_number())
+        return
+    order.phone = message.text
     await state.update_data(pickup_order=order.model_dump())
     await bot.send_message(
         chat_id=message.from_user.id,
@@ -106,7 +112,7 @@ async def get_phone_number_from_text(message: types.Message, bot: Bot, content: 
 async def get_phone_number_from_button(message: types.Message, bot: Bot, content: IContent, state: FSMContext):
     data = await state.get_data()
     order = PickupData(**data.get("pickup_order"))
-    order.phone = message.contact.phone_number  # TODO validate phone number
+    order.phone = message.contact.phone_number
     await state.update_data(pickup_order=order.model_dump())
     await bot.send_message(
         chat_id=message.from_user.id,
@@ -136,7 +142,11 @@ async def choose_cache(
     admin_content = initialize_content()(language=Language.ru)
     order = PickupData(**data.get("pickup_order"))
     order.payment_type = PaymentType.cache
-    order_id = await create_order_pickup(ioc=ioc, user=user, order=order)
+    try:
+        order_id = await create_order_pickup(ioc=ioc, user=user, order=order)
+    except RestaurantLocationNotFound:
+        await bot.send_message(chat_id=message.from_user.id, text=content.text.restaurant_address_not_found())
+        return
     order.order_id = order_id
     await state.update_data(pickup_order=order.model_dump())
     get_group_id = await ioc.read_branch_group()
@@ -198,3 +208,10 @@ async def accept_pickup_order_from_admin(
     accept_order_case = await ioc.accept_order()
     acc_order = await accept_order_case(data=AcceptOrderDtoInput(order_id=order_id))
     telegram_id, language = await user_repo.telegram_id_from_user_id(user_id=acc_order.user_id)
+    user_content = initialize_content()(language=language)
+    with suppress(TelegramBadRequest):
+        await bot.edit_message_reply_markup(
+            chat_id=call.message.chat.id, message_id=call.message.message_id,
+            reply_markup=content.inline.accepted_order_admin_keyboard_pickup(),
+        )
+    await bot.send_message(chat_id=telegram_id, text=user_content.text.accept_order_pickup_by_admin(order_id=order_id))

@@ -54,7 +54,22 @@ class UzbekInlineKeyboardText(IInlineKeyboardText):
         keyboard.inline_keyboard.extend(self.back_button().inline_keyboard)
         return keyboard
 
-    def accept_order_admin_keyboard(self, order_id: OrderId) -> InlineKeyboardMarkup:
+    def accept_order_admin_keyboard_pickup(self, order_id: OrderId) -> InlineKeyboardMarkup:
         return self.inline_keyboard.accept_order_from_admin(
-            button=DefaultInlineButton(text="✅ Подтвердить", callback_data=f"adac_{order_id}"),
+            button=DefaultInlineButton(text="☑️ Подтвердить", callback_data=f"adp_{order_id}"),
+        )
+
+    def accepted_order_admin_keyboard_pickup(self) -> InlineKeyboardMarkup:
+        return self.inline_keyboard.accept_order_from_admin(
+            button=DefaultInlineButton(text="✅ Подтверждено", callback_data=f"..."),
+        )
+
+    def accept_order_admin_keyboard_shipping(self, order_id: OrderId) -> InlineKeyboardMarkup:
+        return self.inline_keyboard.accept_order_from_admin(
+            button=DefaultInlineButton(text="☑️ Подтвердить", callback_data=f"adsh_{order_id}"),
+        )
+
+    def accepted_order_admin_keyboard_shipping(self) -> InlineKeyboardMarkup:
+        return self.inline_keyboard.accept_order_from_admin(
+            button=DefaultInlineButton(text="✅ Подтверждено", callback_data=f"..."),
         )

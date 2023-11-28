@@ -99,5 +99,11 @@ class IInlineKeyboardText(Protocol):
     def accept_order_admin_keyboard_pickup(self, order_id: OrderId) -> InlineKeyboardMarkup:
         raise NotImplementedError
 
+    def accepted_order_admin_keyboard_pickup(self) -> InlineKeyboardMarkup:
+        raise NotImplementedError
+
     def accept_order_admin_keyboard_shipping(self, order_id: OrderId) -> InlineKeyboardMarkup:
+        raise NotImplementedError
+
+    def accepted_order_admin_keyboard_shipping(self) -> InlineKeyboardMarkup:
         raise NotImplementedError
