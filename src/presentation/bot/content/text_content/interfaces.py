@@ -18,6 +18,12 @@ from src.presentation.bot.states.state_data.product import (
 class IText(Protocol):
     language: Language
 
+    def user_promoted_to_admin(self, mention: str) -> str:
+        raise NotImplementedError
+
+    def admin_restricted_to_user(self, mention: str) -> str:
+        raise NotImplementedError
+
     def greeting(self) -> str:
         raise NotImplementedError
 

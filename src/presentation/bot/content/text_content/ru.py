@@ -24,6 +24,12 @@ class RussianText(IText):
     def __init__(self, format: FormatManager):
         self.format = format
 
+    def user_promoted_to_admin(self, mention: str) -> str:
+        return f"Новый администратор! {mention}"
+
+    def admin_restricted_to_user(self, mention: str) -> str:
+        return f"Участник исключен из администраторов! {mention}"
+
     def greeting(self) -> str:
         return (
             "Добро пожаловать в телеграм-бот SUSHI MASTER!\n\n"

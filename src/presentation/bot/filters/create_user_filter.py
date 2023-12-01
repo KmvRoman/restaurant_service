@@ -1,5 +1,6 @@
 from typing import Optional, Any
 
+from aiogram.enums.chat_type import ChatType
 from aiogram.filters import Filter
 from aiogram.types import Message, User
 
@@ -24,11 +25,15 @@ class CreateUserFilter(Filter):
     ) -> bool | dict[str, Any]:
         user = await user_repo.get_user_by_telegram_id(telegram_id=event_from_user.id)
         data = {"user": user}
-        if user is None:
+        if user is None and message.sender_chat.type == ChatType.PRIVATE:
+            if event_from_user.language_code is None:
+                lang = Language.ru
+            else:
+                lang = event_from_user.language_code
             create_user = await ioc.create_user()
             user_id = await create_user(data=CreateUserDtoInput(
                 name=event_from_user.first_name, phone=None,
-                language=Language(event_from_user.language_code),
+                language=Language(lang),
                 member=Member.user,
             ))
             await user_repo.create_telegram_user(user_id=user_id.user_id, telegram_id=event_from_user.id)
