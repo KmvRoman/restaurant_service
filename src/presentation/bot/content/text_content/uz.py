@@ -88,7 +88,8 @@ class UzbekText(IText):
             f"<b>Ваш заказ:</b>\n\n<b>Тип заказа:</b> 🚶 Самовывоз\n"
             f"<b>Телефон:</b> {phone}\n"
             f"{self.format(ExistingTypes.Text).format_products_view(products=products, currency_name='сум')}"
-            f"\n\n<b>Итого  — {total_amount} сум</b>\n\nВсе верно?"
+            f"\n\n<b>Итого  — {self.format(ExistingTypes.Text).format_product_price(total_amount)} "
+            f"сум</b>\n\nВсе верно?"
         )
 
     def choose_type_charge(self) -> str:
@@ -157,8 +158,8 @@ class UzbekText(IText):
             f"<b>Ф.И.О:</b> {first_name}\n"
             f"<b>Телефон:</b> {phone}\n"
             f"<b>Способ оплаты:</b> {payment_type}\n"
-            f"<b>Адрес: {address}</b>\n"
-            f"<b>Комментарий: {comment}</b>\n\n"
+            f"<b>Адрес:</b> {address}\n"
+            f"<b>Комментарий:</b> {comment}\n\n"
             f"<b>Сумма заказа:</b> {self.format(ExistingTypes.Text).format_product_price(total_amount)} сум\n\n"
             f"<b>Доставка:</b> {self.format(ExistingTypes.Text).format_product_price(shipping_amount)} сум"
         )
@@ -174,3 +175,9 @@ class UzbekText(IText):
     def wrong_phone_number(self) -> str:
         return ("⛔️ Неверно введен номер телефона, попробуйте снова. "
                 "Отправьте или введите ваш номер телефона\nв формате: +998** *** ** **")
+
+    def wrong_comment_length(self) -> str:
+        return "⛔️ Слишком длинный комментарий, пожалуйста опишите то что вы хотите более кратко"
+
+    def no_comment(self) -> str:
+        return "Комментариев нет"

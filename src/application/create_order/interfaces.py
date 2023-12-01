@@ -1,10 +1,13 @@
 from src.application.common.interfaces import (
     CreateShippingOrder, CreatePickUpOrder,
-    Committer, ShippingLength, ReadRestaurantLocationById,
+    Committer, ShippingLength, ReadRestaurantLocationById, AddAddressToAddressPool, ExistUserAddress,
 )
 
 
-class DbGateway(CreateShippingOrder, CreatePickUpOrder, ReadRestaurantLocationById, Committer):
+class DbGateway(
+    CreateShippingOrder, CreatePickUpOrder, ReadRestaurantLocationById,
+    ExistUserAddress, AddAddressToAddressPool, Committer
+):
     pass
 
 

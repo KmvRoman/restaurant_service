@@ -42,5 +42,6 @@ class BasketViewOutput:
     prepared: list[PreparedProductOutput]
     order_type: OrderType
     shipping_amount: Optional[int]
+    shipping_length: Optional[float]
     amount: int
     total_amount: int

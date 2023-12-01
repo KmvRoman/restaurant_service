@@ -21,3 +21,4 @@ from .models.shipping_location_table import ShippingLocationTable
 from .models.shipping_order import ShippingOrderTable
 from .models.restaurant_banner_table import RestaurantBannerTable
 from .models.group_table import GroupTable
+from .models.user_addresses import UserAddressTable

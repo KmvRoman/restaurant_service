@@ -80,7 +80,7 @@ async def get_location(
     F.text.in_([i.back for i in Back.__subclasses__()]),
     StateFilter(OrderStatePickUp.accept_order, OrderStatePickUp.charge_type),
 )
-@pickup.message(F.text == "pickup", OrderStatePickUp.send_location)  # TODO replace with real pickup handler
+@pickup.message(F.text == "pickup", OrderStatePickUp.send_location)
 @pickup.message(F.web_app_data)
 async def webapp_exit(
         message: types.Message, bot: Bot, content: IContent, state: FSMContext,
@@ -170,7 +170,7 @@ async def choose_cache(
     await bot.send_message(chat_id=message.from_user.id, text=content.text.send_finish_order_presentation_pickup(
         order_id=order_id, products=user_order.products, total_amount=user_order.total_cost,
     ), reply_markup=content.reply.users_main_menu())
-    await state.set_state(OrderStatePickUp.charge_url)
+    await state.set_state(StartStates.start)
 
 
 @pickup.message(F.text.in_([i.payme for i in PaymentTypes.__subclasses__()]), OrderStatePickUp.charge_type)

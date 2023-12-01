@@ -11,6 +11,7 @@ from src.domain.user.entities.user import UserId
 
 class ShippingData(BaseModel):
     order_id: OrderId | None = None
+    restaurant_location_id: LocationId | None = None
     user_id: UserId | None = None
     phone: str | None = None
     payment_type: Optional[PaymentType] | None = None
@@ -21,6 +22,7 @@ class ShippingData(BaseModel):
     comment: str | None = None
     amount: int | None = None
     shipping_length: float | None = None
+    shipping_amount: int | None = None
     total_amount: int | None = None
     products: list[PreparedBasketProduct] = []
 

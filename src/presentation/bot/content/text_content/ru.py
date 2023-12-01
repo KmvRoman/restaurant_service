@@ -220,12 +220,13 @@ class RussianText(IText):
             f"<b>Ваш заказ:</b>\n\n<b>Тип заказа:</b> 🚶 Самовывоз\n"
             f"<b>Телефон:</b> {phone}\n"
             f"{self.format(ExistingTypes.Text).format_products_view(products=products, currency_name='сум')}"
-            f"\n\n<b>Итого  — {total_amount} сум</b>\n\nВсе верно?"
+            f"\n\n<b>Итого  — {self.format(ExistingTypes.Text).format_product_price(total_amount)} "
+            f"сум</b>\n\nВсе верно?"
         )
 
     def accept_order_shipping(
             self, comment: str, phone: str, address: str, shipping_length: float,
-            products: list[PreparedBasketProduct], amount: int, shipping_amount: str,
+            products: list[PreparedBasketProduct], amount: int, shipping_amount: int,
             total_amount: int,
     ) -> str:
         return (
@@ -278,7 +279,7 @@ class RussianText(IText):
             shipping_amount: int, total_amount: int,
     ) -> str:
         return (
-            f"Ваш заказ принят, ориентировочное время готовности 20 минут. Номер вашего заказа #{order_id}.\n"
+            f"Ваш заказ принят и будет отправлен в указанный срок. Номер вашего заказа #{order_id}.\n"
             f"{self.format(ExistingTypes.Text).format_products_view_user(products=products, currency_name='сум')}"
             f"\n\nСтоимость доставки — {self.format(ExistingTypes.Text).format_product_price(shipping_amount)} сум"
             f"\n<b>Итого  — {self.format(ExistingTypes.Text).format_product_price(total_amount)} сум</b>"
@@ -309,8 +310,8 @@ class RussianText(IText):
             f"<b>Ф.И.О:</b> {first_name}\n"
             f"<b>Телефон:</b> {phone}\n"
             f"<b>Способ оплаты:</b> {payment_type}\n"
-            f"<b>Адрес: {address}</b>\n"
-            f"<b>Комментарий: {comment}</b>\n\n"
+            f"<b>Адрес:</b> {address}\n"
+            f"<b>Комментарий:</b> {comment}\n\n"
             f"<b>Сумма заказа:</b> {self.format(ExistingTypes.Text).format_product_price(total_amount)} сум\n\n"
             f"<b>Доставка:</b> {self.format(ExistingTypes.Text).format_product_price(shipping_amount)} сум"
         )
@@ -320,8 +321,14 @@ class RussianText(IText):
                 f"Ориентировочное время готовности 20 минут.")
 
     def accept_order_shipping_by_admin(self, order_id: OrderId) -> str:
-        return f"Ваш заказ принят и будет отправлен в указанный срок. Номер вашего заказа #{order_id}."
+        return f"Заказ #{order_id} в процессе приготовления.\nРасчетное время доставки от 40 минут."
 
     def wrong_phone_number(self) -> str:
         return ("⛔️ Неверно введен номер телефона, попробуйте снова. "
                 "Отправьте или введите ваш номер телефона\nв формате: +998** *** ** **")
+
+    def wrong_comment_length(self) -> str:
+        return "⛔️ Слишком длинный комментарий, пожалуйста опишите то что вы хотите более кратко"
+
+    def no_comment(self) -> str:
+        return "Комментариев нет"

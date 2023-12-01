@@ -2,6 +2,7 @@ from aiogram import types, Bot
 from aiogram.fsm.context import FSMContext
 
 from src.application.get_address_from_location.dto import GetAddressFromLocationDtoInput
+from src.application.read_current_basket.dto import ReadCurrentBasketDtoInput
 from src.application.read_nearest_location_id.dto import ReadNearestLocationDtoInput
 from src.application.read_user_addresses.dto import GetUserAddressesDtoInput
 from src.application.read_user_location_by_address.dto import ReadUserLocationByAddressDtoInput
@@ -12,7 +13,6 @@ from src.domain.user.entities.user import User
 from src.infrastructure.ioc.interfaces import InteractorFactory
 from src.presentation.bot.content.fasade.interfaces import IContent
 from src.presentation.bot.states.state_data.order import ShippingData
-from src.presentation.bot.states.user.order import OrderStateShipping
 
 
 async def selected_shipping(
@@ -48,6 +48,7 @@ async def get_user_location(
     data = await state.get_data()
     order = ShippingData(**data.get("shipping_order"))
     order.address = address.address
+    order.restaurant_location_id = nearest_restaurant_location.restaurant_location_id
     order.location = Location(longitude=message.location.longitude, latitude=message.location.latitude)
     await state.update_data(shipping_order=order.model_dump())
     await bot.send_message(
@@ -79,15 +80,39 @@ async def get_user_address(
     order = ShippingData(**data.get("shipping_order"))
     order.address = message.text
     order.location = location.location
+    order.restaurant_location_id = nearest_restaurant_location.restaurant_location_id
     await state.update_data(shipping_order=order.model_dump())
     await bot.send_message(
         chat_id=message.from_user.id,
         text=content.text.show_webapp_button_in_shipping(order.address),
         reply_markup=content.reply.webapp_input_keyboard(
             user_id=user.id, restaurant_id=restaurant, user_location=Location(
-                longitude=message.location.longitude, latitude=message.location.latitude,
+                longitude=location.location.longitude, latitude=location.location.latitude,
             ), language=user.language,
             restaurant_location_id=nearest_restaurant_location.restaurant_location_id,
             order_type=OrderType.shipping,
         ),
+    )
+
+
+async def exit_webapp_shipping(
+        message: types.Message, bot: Bot, content: IContent, state: FSMContext,
+        ioc: InteractorFactory, user: User,
+):
+    data = await state.get_data()
+    order = ShippingData(**data.get("shipping_order"))
+    current_basket_case = await ioc.read_current_basket()
+    basket = await current_basket_case(data=ReadCurrentBasketDtoInput(
+        user_id=user.id, user_location=order.location, restaurant_location_id=order.restaurant_location_id,
+        order_type=OrderType.shipping, language=user.language,
+    ))
+    order.products = basket.prepared
+    order.amount = basket.amount
+    order.shipping_length = basket.shipping_length
+    order.shipping_amount = basket.shipping_amount
+    order.total_amount = basket.total_amount
+    await state.update_data(shipping_order=order.model_dump())
+    await bot.send_message(
+        chat_id=message.from_user.id, text=content.text.get_comment(),
+        reply_markup=content.reply.user_comment_keyboard(),
     )

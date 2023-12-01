@@ -9,7 +9,7 @@ from src.infrastructure.exceptions.exceptions import WrongLocations
 
 
 class ShippingLengthInfo(BaseModel):
-    length: int
+    length: float
 
 
 class ShippingLengthImpl(ShippingLength):
@@ -31,23 +31,24 @@ class ShippingLengthImpl(ShippingLength):
             except KeyError:
                 raise WrongLocations
 
-    async def get_shipping_length(self, user_location: Location, restaurant_location: Location) -> int:
-        shipping_length = await self.redis_cache.get_common(
-            name=f"{self.key_started}-{user_location.longitude}|{user_location.latitude}-"
-                 f"{restaurant_location.longitude}|{restaurant_location.latitude}",
-        )
-        if shipping_length is None:
-            length = await self.calculate_shipping_length(
-                user_location=user_location, restaurant_location=restaurant_location,
-            )
-            await self.redis_cache.set_common(payload=InsertRedisData(
-                name=f"{self.key_started}-{user_location.longitude}|{user_location.latitude}-"
-                     f"{restaurant_location.longitude}|{restaurant_location.latitude}",
-                value=ShippingLengthInfo(length=length).model_dump_json(),
-                expires=86400,
-            ))
-        shipping_length = await self.redis_cache.get_common(
-            name=f"{self.key_started}-{user_location.longitude}|{user_location.latitude}-"
-                 f"{restaurant_location.longitude}|{restaurant_location.latitude}",
-        )
-        return ShippingLengthInfo.model_validate_json(shipping_length).length
+    async def get_shipping_length(self, user_location: Location, restaurant_location: Location) -> float:
+        # shipping_length = await self.redis_cache.get_common(
+        #     name=f"{self.key_started}-{user_location.longitude}|{user_location.latitude}-"
+        #          f"{restaurant_location.longitude}|{restaurant_location.latitude}",
+        # )
+        # if shipping_length is None:
+        #     length = await self.calculate_shipping_length(
+        #         user_location=user_location, restaurant_location=restaurant_location,
+        #     )
+        #     await self.redis_cache.set_common(payload=InsertRedisData(
+        #         name=f"{self.key_started}-{user_location.longitude}|{user_location.latitude}-"
+        #              f"{restaurant_location.longitude}|{restaurant_location.latitude}",
+        #         value=ShippingLengthInfo(length=length).model_dump_json(),
+        #         expires=86400,
+        #     ))
+        # shipping_length = await self.redis_cache.get_common(
+        #     name=f"{self.key_started}-{user_location.longitude}|{user_location.latitude}-"
+        #          f"{restaurant_location.longitude}|{restaurant_location.latitude}",
+        # )
+        # return ShippingLengthInfo.model_validate_json(shipping_length).length
+        return 20600

@@ -23,5 +23,5 @@ class ReadAdminOrderDtoOutput:
     address: Optional[str]
     comment: Optional[str]
     location: Optional[Location]
-    shipping_amount: Optional[str]
+    shipping_amount: Optional[int]
     total_cost: int

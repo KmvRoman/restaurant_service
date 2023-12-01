@@ -161,7 +161,7 @@ class IText(Protocol):
 
     def accept_order_shipping(
             self, comment: str, phone: str, address: str, shipping_length: float,
-            products: list[PreparedBasketProduct], amount: int, shipping_amount: str,
+            products: list[PreparedBasketProduct], amount: int, shipping_amount: int,
             total_amount: int,
     ) -> str:
         raise NotImplementedError
@@ -210,6 +210,12 @@ class IText(Protocol):
         raise NotImplementedError
 
     def wrong_phone_number(self) -> str:
+        raise NotImplementedError
+
+    def wrong_comment_length(self) -> str:
+        raise NotImplementedError
+
+    def no_comment(self) -> str:
         raise NotImplementedError
 
 

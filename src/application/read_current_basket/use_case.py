@@ -25,17 +25,17 @@ class ReadCurrentBasketCase(UseCase[ReadCurrentBasketDtoInput, ReadCurrentBasket
             location_id=data.restaurant_location_id)
         if data.user_location is None:
             shipping_amount = None
+            shipping_length = None
         else:
             shipping_length = await self.shipping_length_calculate_service.get_shipping_length(
                 user_location=data.user_location, restaurant_location=restaurant_location,
             )
             shipping_amount = self.order_service.calculate_shipping_amount(shipping_length=shipping_length)
         basket_view = self.basket_view_service.current_basket(
-            basket=basket, shipping_amount=shipping_amount, order_type=data.order_type,
+            basket=basket, shipping_amount=shipping_amount, shipping_length=shipping_length, order_type=data.order_type,
         )
         return ReadCurrentBasketDtoOutput(
-            user_id=basket_view.user_id,
-            prepared=[
+            user_id=basket_view.user_id, prepared=[
                 PreparedBasketProduct(
                     product_id=pr.product_id, photo=pr.photo, name=pr.name,
                     modification=pr.modification,
@@ -43,8 +43,7 @@ class ReadCurrentBasketCase(UseCase[ReadCurrentBasketDtoInput, ReadCurrentBasket
                     amount=pr.amount
                 ) for pr in basket_view.prepared
             ],
-            order_type=basket_view.order_type,
-            amount=basket_view.amount,
-            shipping_amount=basket_view.shipping_amount,
+            order_type=basket_view.order_type, amount=basket_view.amount,
+            shipping_amount=basket_view.shipping_amount, shipping_length=basket_view.shipping_length,
             total_amount=basket_view.total_amount,
         )

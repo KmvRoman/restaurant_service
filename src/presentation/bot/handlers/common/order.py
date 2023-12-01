@@ -37,6 +37,6 @@ async def create_order_shipping(
                 count=i.count, price=i.price
             ) for i in order.products
         ], location=order.location, address=order.address, comment=order.comment,
-        shipping_length=order.shipping_length,
+        shipping_length=order.shipping_length, payment_type=order.payment_type,
     ))
     return create_order.order_id

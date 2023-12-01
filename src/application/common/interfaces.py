@@ -138,6 +138,16 @@ class CreateShippingOrder(Protocol):
         raise NotImplementedError
 
 
+class ExistUserAddress(Protocol):
+    async def exist_user_address(self, address: str, user_id: UserId) -> bool:
+        raise NotImplementedError
+
+
+class AddAddressToAddressPool(Protocol):
+    async def add_address_to_pool(self, order_id: int) -> None:
+        raise NotImplementedError
+
+
 class CreatePickUpOrder(Protocol):
     async def create_pick_up_order(self, order: PickUpOrder) -> OrderId:
         raise NotImplementedError
@@ -258,7 +268,7 @@ class ReadUserLocationByAddress(Protocol):
 
 
 class ShippingLength(Protocol):
-    async def get_shipping_length(self, user_location: Location, restaurant_location: Location) -> int:
+    async def get_shipping_length(self, user_location: Location, restaurant_location: Location) -> float:
         raise NotImplementedError
 
 

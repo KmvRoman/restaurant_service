@@ -23,7 +23,10 @@ class CreateOrderCase(UseCase[CreateOrderDtoInput, CreateOrderDtoOutput]):
             comment=data.comment, shipping_length=data.shipping_length,
         )
         if isinstance(order, ShippingOrder):
+            exist_address = await self.db_gateway.exist_user_address(address=data.address, user_id=data.user_id)
             order_id = await self.db_gateway.create_shipping_order(order=order)
+            if not exist_address:
+                await self.db_gateway.add_address_to_pool(order_id=order_id)
         else:
             order_id = await self.db_gateway.create_pick_up_order(order=order)
         await self.db_gateway.commit()

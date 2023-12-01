@@ -26,7 +26,7 @@ from src.infrastructure.database import (
     ProductBasketModificationTable, CategoriesTable, CategoryNameTable,
     RestaurantBannerTable, RestaurantTable, RestaurantNameDescriptionTable,
     ShippingOrderTable, OrderTable, ShippingLocationTable, ProductOrderTable,
-    GroupTable,
+    GroupTable, UserAddressTable,
 )
 from src.infrastructure.database.enums import TelegramStatus
 from src.infrastructure.database.exceptions.product import (
@@ -562,13 +562,17 @@ class UserRepository(BaseRepository):
         return [address for address in result]
 
     async def read_user_addresses(self, user_id: UserId) -> list[str]:
-        stmt = select(ShippingOrderTable.id, ShippingOrderTable.address).select_from(
+        stmt = select(ShippingOrderTable.address, ShippingOrderTable.id).select_from(
             ShippingOrderTable
-        ).distinct().join(
+        ).join(
             OrderTable, ShippingOrderTable.order_id == OrderTable.id
-        ).where(OrderTable.user_id == user_id).order_by(desc(ShippingOrderTable.id))
-        result = (await self.session.execute(stmt)).scalars().all()
-        return [address[1] for address in result]
+        ).join(
+            UserAddressTable, UserAddressTable.order_id == OrderTable.id
+        ).where(OrderTable.user_id == user_id).order_by(
+            desc(ShippingOrderTable.id)
+        ).limit(3)
+        result = (await self.session.execute(stmt)).all()
+        return [address[0] for address in result]
 
     async def read_restaurant_location_id_by_address(self, restaurant_id: RestaurantId, address: str) -> int:
         stmt = select(RestaurantLocationsTable.id).where(
@@ -620,6 +624,17 @@ class UserRepository(BaseRepository):
         self.session.add(shipping_location)
         return create_order.id
 
+    async def exist_user_address(self, address: str, user_id: UserId) -> bool:
+        stmt = select(ShippingOrderTable.address).select_from(ShippingOrderTable).join(
+            OrderTable, ShippingOrderTable.order_id == OrderTable.id
+        ).where(OrderTable.user_id == user_id, ShippingOrderTable.address == address)
+        result = (await self.session.execute(stmt)).scalars().first()
+        return bool(result)
+
+    async def add_address_to_pool(self, order_id: OrderId) -> None:
+        address = UserAddressTable(order_id=order_id)
+        self.session.add(address)
+
     async def add_products_to_order(self, order_id: OrderId, products: list[ProductOrder]):
         for product in products:
             add_product = ProductOrderTable(
@@ -658,7 +673,7 @@ class UserRepository(BaseRepository):
 
     async def read_order_admin(self, order_id: OrderId) -> ReadOrderAdmin | None:
         stmt = select(
-            OrderTable.id, UserTable.name, UserTable.phone, OrderTable.payment_type, ShippingOrderTable.address,
+            OrderTable.id, UserTable.name, OrderTable.phone, OrderTable.payment_type, ShippingOrderTable.address,
             ShippingOrderTable.comment, ShippingLocationTable.longitude, ShippingLocationTable.latitude,
             OrderTable.amount, ShippingOrderTable.total_amount,
         ).select_from(
