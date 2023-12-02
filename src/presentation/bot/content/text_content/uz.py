@@ -2,10 +2,11 @@ from typing import Optional
 
 from src.application.read_current_basket.dto import PreparedBasketProduct
 from src.domain.order.entities.order import OrderId, Location
+from src.domain.order.entities.order_view import ReadUserOrderProduct, ReadAdminOrderProduct
 from src.domain.user.constants.user import Language
 from src.presentation.bot.content.content_enums import ExistingTypes
 from src.presentation.bot.content.format.format_manager import FormatManager
-from src.presentation.bot.content.text_content.constants import ConcretePaymentTypeRu
+from src.presentation.bot.content.text_content.constants import ConcretePaymentTypeRu, ConcretePaymentType
 from src.presentation.bot.content.text_content.interfaces import IText
 
 
@@ -14,6 +15,15 @@ class UzbekText(IText):
 
     def __init__(self, format: FormatManager):
         self.format = format
+
+    def user_promoted_to_admin(self, mention: str) -> str:
+        return f"Новый администратор! {mention}"
+
+    def admin_restricted_to_user(self, mention: str) -> str:
+        return f"Участник исключен из администраторов! {mention}"
+
+    def administrators_updated(self) -> str:
+        return "Администраторы обновлены!"
 
     def greeting(self) -> str:
         return (
@@ -92,6 +102,25 @@ class UzbekText(IText):
             f"сум</b>\n\nВсе верно?"
         )
 
+    def accept_order_shipping(
+            self, comment: str, phone: str, address: str, shipping_length: float,
+            products: list[PreparedBasketProduct], amount: int, shipping_amount: int,
+            total_amount: int,
+    ) -> str:
+        return (
+            f"<b>Ваш заказ:</b>\n\n<b>"
+            f"Тип заказа:</b> 🛵 Доставка\n"
+            f"<b>Телефон:</b> {phone}\n"
+            f"<b>Адрес:</b> {address}\n"
+            f"<b>Комментарий:</b> {comment}\n"
+            f"{self.format(ExistingTypes.Text).format_products_view(products=products, currency_name='сум')}"
+            f"\n\n<b>Сумма заказа: {self.format(ExistingTypes.Text).format_product_price(amount)} сум</b>"
+            f"\n\nСтоимость доставки — {self.format(ExistingTypes.Text).format_product_price(shipping_amount)} сум"
+            f"\n<i>Ориентировочное расстояние от филиала: {shipping_length} км</i>"
+            f"\n\n<b>Итого  — {self.format(ExistingTypes.Text).format_product_price(total_amount)} сум</b>"
+            f"\n\nВсе верно?"
+        )
+
     def choose_type_charge(self) -> str:
         return "Выберите способ оплаты 👇"
 
@@ -113,7 +142,7 @@ class UzbekText(IText):
         return "✅ Оплата прошла успешно"
 
     def send_finish_order_presentation_pickup(
-            self, order_id: OrderId, products: list[PreparedBasketProduct],
+            self, order_id: OrderId, products: list[ReadUserOrderProduct],
             total_amount: int,
     ) -> str:
         return (
@@ -123,7 +152,7 @@ class UzbekText(IText):
         )
 
     def send_finish_order_presentation_shipping(
-            self, order_id: OrderId, products: list[PreparedBasketProduct],
+            self, order_id: OrderId, products: list[ReadUserOrderProduct],
             shipping_amount: int, total_amount: int,
     ) -> str:
         return (
@@ -135,8 +164,8 @@ class UzbekText(IText):
         )
 
     def send_order_to_admins_pickup(
-            self, order_id: OrderId, products: list[PreparedBasketProduct],
-            first_name: str, phone: str, payment_type: type[ConcretePaymentTypeRu], total_amount: int,
+            self, order_id: OrderId, products: list[ReadAdminOrderProduct],
+            first_name: str, phone: str, payment_type: ConcretePaymentType, total_amount: int,
     ):
         return (
             f"<b>Заказ #{order_id}</b> — 🚶 Самовывоз\n"
@@ -148,8 +177,8 @@ class UzbekText(IText):
         )
 
     def send_order_to_admins_shipping(
-            self, order_id: OrderId, products: list[PreparedBasketProduct],
-            first_name: str, phone: str, payment_type: type[ConcretePaymentTypeRu], address: str, comment: str,
+            self, order_id: OrderId, products: list[ReadAdminOrderProduct],
+            first_name: str, phone: str, payment_type: ConcretePaymentType, address: str, comment: str,
             shipping_amount: int, total_amount: int, user_location: Location,
     ):
         return (
@@ -181,3 +210,6 @@ class UzbekText(IText):
 
     def no_comment(self) -> str:
         return "Комментариев нет"
+
+    def select_branches_attach_group(self) -> str:
+        return "Выберите филиалы к которым хотите присоеденить текущую группу"

@@ -1,5 +1,7 @@
 from aiogram.types import InlineKeyboardMarkup
 
+from src.application.read_branches.dto import ReadBranchesDtoOutput
+from src.application.read_detached_branches.dto import ReadDetachedBranchDtoOutput
 from src.application.read_restaurants.dto import ReadRestaurantDtoOutput
 from src.domain.order.entities.order import OrderId
 from src.domain.user.constants.user import Language
@@ -73,3 +75,6 @@ class UzbekInlineKeyboardText(IInlineKeyboardText):
         return self.inline_keyboard.accept_order_from_admin(
             button=DefaultInlineButton(text="✅ Подтверждено", callback_data=f"..."),
         )
+
+    def groups_match_with_branches(self, buttons: list[ReadDetachedBranchDtoOutput]) -> InlineKeyboardMarkup:
+        pass

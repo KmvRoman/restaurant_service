@@ -178,6 +178,11 @@ class ReadBranches(Protocol):
         raise NotImplementedError
 
 
+class ReadDetachedBranches(Protocol):
+    async def read_detached_branches(self, restaurant_id: RestaurantId) -> list[ReadRestaurantBranches]:
+        raise NotImplementedError
+
+
 class ReadRestaurantLocationById(Protocol):
     async def read_restaurant_location(self, location_id: LocationId) -> Location | None:
         raise NotImplementedError

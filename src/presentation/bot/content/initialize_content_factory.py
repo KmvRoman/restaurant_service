@@ -1,5 +1,4 @@
 from src.domain.user.constants.user import Language
-from src.infrastructure.database.repositories.user_repository import UserRepository
 from src.presentation.bot.content.fasade.ru import ContentRu
 from src.presentation.bot.content.fasade.uz import ContentUz
 from src.presentation.bot.content.format.amount_format import FormatAmount

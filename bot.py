@@ -68,6 +68,7 @@ async def main():
     dp.message.filter(CreateUserFilter(), CurrentRestaurant())
     dp.callback_query.filter(CreateUserFilter(), CurrentRestaurant())
     dp.chat_member.filter(CreateUserFilter())
+    dp.my_chat_member.filter(CreateUserFilter(), CurrentRestaurant())
     dp.startup.register(start_bot)
     dp.shutdown.register(shutdown_bot)
     dp.include_routers(*routers)

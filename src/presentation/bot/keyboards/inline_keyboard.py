@@ -140,3 +140,8 @@ class InlineKeyboard:
         return InlineKeyboardMarkup(inline_keyboard=[
             [InlineKeyboardButton(text=button.text, callback_data=button.callback_data)]
         ])
+
+    def groups_match_with_branches(self, buttons: list[DefaultInlineButton]) -> InlineKeyboardMarkup:
+        return InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text=button.text, callback_data=button.callback_data) for button in buttons]
+        ])

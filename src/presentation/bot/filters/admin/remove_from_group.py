@@ -6,7 +6,7 @@ from aiogram.types import ChatMemberUpdated, User
 from aiogram.enums.chat_member_status import ChatMemberStatus
 
 
-class RestrictAdmin(Filter):
+class UnmatchGroupFromBranch(Filter):
     def __init__(self, name: Optional[str] = None) -> None:
         self.name = name
 
@@ -19,5 +19,8 @@ class RestrictAdmin(Filter):
         if message.new_chat_member.status in [
             ChatMemberStatus.MEMBER, ChatMemberStatus.KICKED,
             ChatMemberStatus.RESTRICTED, ChatMemberStatus.LEFT,
-        ] and message.from_user.is_bot is not True:
+        ] and message.old_chat_member.status in [
+            ChatMemberStatus.CREATOR, ChatMemberStatus.ADMINISTRATOR,
+            ChatMemberStatus.MEMBER,
+        ]:
             return True

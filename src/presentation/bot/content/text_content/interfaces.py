@@ -24,6 +24,9 @@ class IText(Protocol):
     def admin_restricted_to_user(self, mention: str) -> str:
         raise NotImplementedError
 
+    def administrators_updated(self) -> str:
+        raise NotImplementedError
+
     def greeting(self) -> str:
         raise NotImplementedError
 
@@ -222,6 +225,21 @@ class IText(Protocol):
         raise NotImplementedError
 
     def no_comment(self) -> str:
+        raise NotImplementedError
+
+    def select_branches_attach_group(self) -> str:
+        raise NotImplementedError
+
+    def remind_promote_bot_to_admin(self) -> str:
+        raise NotImplementedError
+
+    def attached_group(self) -> str:
+        raise NotImplementedError
+
+    def error_to_attach_group(self) -> str:
+        raise NotImplementedError
+
+    def detach_group(self) -> str:
         raise NotImplementedError
 
 

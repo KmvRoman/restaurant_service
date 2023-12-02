@@ -30,6 +30,9 @@ class RussianText(IText):
     def admin_restricted_to_user(self, mention: str) -> str:
         return f"Участник исключен из администраторов! {mention}"
 
+    def administrators_updated(self) -> str:
+        return "Администраторы обновлены!"
+
     def greeting(self) -> str:
         return (
             "Добро пожаловать в телеграм-бот SUSHI MASTER!\n\n"
@@ -307,7 +310,7 @@ class RussianText(IText):
 
     def send_order_to_admins_shipping(
             self, order_id: OrderId, products: list[ReadAdminOrderProduct],
-            first_name: str, phone: str, payment_type: type[ConcretePaymentTypeRu], address: str, comment: str,
+            first_name: str, phone: str, payment_type: ConcretePaymentType, address: str, comment: str,
             shipping_amount: int, total_amount: int, user_location: Location,
     ):
         return (
@@ -338,3 +341,19 @@ class RussianText(IText):
 
     def no_comment(self) -> str:
         return "Комментариев нет"
+
+    def select_branches_attach_group(self) -> str:
+        return "Выберите филиалы к которым хотите присоеденить текущую группу"
+
+    def remind_promote_bot_to_admin(self) -> str:
+        return ("Не забудьте повысить меня до администратора чтобы я был полезен, "
+                "и присоединил какой-либо филиал вашего ресторана!")
+
+    def attached_group(self) -> str:
+        return "Группа была присоединена к филиалу"
+
+    def error_to_attach_group(self) -> str:
+        return "Эта группа уже присоединена"
+
+    def detach_group(self) -> str:
+        return "Группа отсоединена"

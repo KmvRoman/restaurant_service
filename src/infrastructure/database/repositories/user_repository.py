@@ -117,6 +117,8 @@ class UserRepository(BaseRepository):
         stmt = select(
             RestaurantLocationsTable.id, RestaurantLocationsTable.address,
             RestaurantLocationsTable.latitude, RestaurantLocationsTable.longitude,
+        ).join(
+            GroupTable, RestaurantLocationsTable.id == GroupTable.restaurant_location_id
         ).where(RestaurantLocationsTable.restaurant_id == restaurant_id)
         result = (await self.session.execute(stmt)).all()
         if len(result) == 0:
@@ -410,13 +412,40 @@ class UserRepository(BaseRepository):
             ))
 
     async def read_branches(self, restaurant_id: RestaurantId) -> list[ReadRestaurantBranches] | None:
-        stmt = select(RestaurantLocationsTable.id, RestaurantLocationsTable.address).where(
+        stmt = select(RestaurantLocationsTable.id, RestaurantLocationsTable.address).join(
+            GroupTable, RestaurantLocationsTable.id == GroupTable.restaurant_location_id
+        ).where(
             RestaurantLocationsTable.restaurant_id == restaurant_id
         )
         result = (await self.session.execute(stmt)).all()
         if len(result) == 0:
             return None
         return [ReadRestaurantBranches(location_id=br[0], address=br[1]) for br in result]
+
+    async def read_detached_branches(self, restaurant_id: RestaurantId) -> list[ReadRestaurantBranches]:
+        stmt = select(RestaurantLocationsTable.id, RestaurantLocationsTable.address).outerjoin(
+            GroupTable, RestaurantLocationsTable.id == GroupTable.restaurant_location_id
+        ).where(
+            RestaurantLocationsTable.restaurant_id == restaurant_id,
+            GroupTable.group_id.is_(None),
+        )
+        result = (await self.session.execute(stmt)).all()
+        return [ReadRestaurantBranches(location_id=br[0], address=br[1]) for br in result]
+
+    async def attach_group_to_branch(self, restaurant_location_id: int, group_id: int) -> None:
+        stmt = select(GroupTable.group_id).where(
+            GroupTable.group_id == group_id,
+        )
+        result = (await self.session.execute(stmt)).scalars().first()
+        if result is None or result != group_id:
+            group = GroupTable(restaurant_location_id=restaurant_location_id, group_id=group_id)
+            self.session.add(group)
+            await self.session.commit()
+
+    async def detach_group(self, group_id: int) -> None:
+        stmt = delete(GroupTable).where(GroupTable.group_id == group_id)
+        await self.session.execute(stmt)
+        await self.session.commit()
 
     async def get_product_by_menu_product_id(self, menu_product_id: ProductId) -> ProductAdmin | None:
         stmt = select(
@@ -554,7 +583,9 @@ class UserRepository(BaseRepository):
         await self.session.execute(stmt)
 
     async def read_restaurant_addresses(self, restaurant_id: RestaurantId) -> list[str] | None:
-        stmt = select(RestaurantLocationsTable.address).where(
+        stmt = select(RestaurantLocationsTable.address).join(
+            GroupTable, RestaurantLocationsTable.id == GroupTable.restaurant_location_id
+        ).where(
             RestaurantLocationsTable.restaurant_id == restaurant_id).order_by(RestaurantLocationsTable.id)
         result = (await self.session.execute(stmt)).scalars().all()
         if len(result) == 0:

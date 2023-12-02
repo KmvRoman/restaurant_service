@@ -2,6 +2,7 @@ from aiogram.types import InlineKeyboardMarkup
 
 from src.application.read_branches.dto import ReadBranchesDtoOutput
 from src.application.read_category_products.dto import CategoryProduct
+from src.application.read_detached_branches.dto import ReadDetachedBranchDtoOutput
 from src.application.read_restaurants.dto import ReadRestaurantDtoOutput
 from src.application.read_stop_list.dto import ReadStopListDtoOutput
 from src.domain.order.entities.order import OrderId
@@ -221,3 +222,11 @@ class RussianInlineKeyboardText(IInlineKeyboardText):
         return self.inline_keyboard.accept_order_from_admin(
             button=DefaultInlineButton(text="✅ Подтверждено", callback_data=f"..."),
         )
+
+    def groups_match_with_branches(self, buttons: list[ReadDetachedBranchDtoOutput]) -> InlineKeyboardMarkup:
+        return self.inline_keyboard.groups_match_with_branches(buttons=[
+            DefaultInlineButton(
+                text=button.address,
+                callback_data=f"match_{button.location_id}",
+            ) for button in buttons
+        ])

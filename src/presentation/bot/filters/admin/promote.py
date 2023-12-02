@@ -11,10 +11,12 @@ class PromoteAdmin(Filter):
         self.name = name
 
     async def __call__(
-        self,
-        message: ChatMemberUpdated,
-        event_from_user: User,
-        bot: Bot,
+            self,
+            message: ChatMemberUpdated,
+            event_from_user: User,
+            bot: Bot,
     ) -> bool | dict[str, Any]:
-        if message.new_chat_member.status in [ChatMemberStatus.CREATOR, ChatMemberStatus.ADMINISTRATOR]:
+        if message.new_chat_member.status in [
+            ChatMemberStatus.CREATOR, ChatMemberStatus.ADMINISTRATOR
+        ] and message.from_user.is_bot is not True:
             return True

@@ -5,12 +5,13 @@ from aiogram.types import InlineKeyboardMarkup
 
 from src.application.read_branches.dto import ReadBranchesDtoOutput
 from src.application.read_category_products.dto import CategoryProduct
+from src.application.read_detached_branches.dto import ReadDetachedBranchDtoOutput
 from src.application.read_restaurants.dto import ReadRestaurantDtoOutput
 from src.application.read_stop_list.dto import ReadStopListDtoOutput
 from src.domain.order.entities.order import OrderId
 from src.domain.product.constants.product import ProductMode
 from src.domain.restaurant.constants.constants import MenuProductStatus
-from src.domain.restaurant.entities.restaurant_view import RestaurantId, Category, RestaurantLocation
+from src.domain.restaurant.entities.restaurant_view import Category
 from src.domain.user.constants.user import Language
 from src.presentation.bot.states.state_data.product import ProductPriceData
 
@@ -106,4 +107,7 @@ class IInlineKeyboardText(Protocol):
         raise NotImplementedError
 
     def accepted_order_admin_keyboard_shipping(self) -> InlineKeyboardMarkup:
+        raise NotImplementedError
+
+    def groups_match_with_branches(self, buttons: list[ReadDetachedBranchDtoOutput]) -> InlineKeyboardMarkup:
         raise NotImplementedError
