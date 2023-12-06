@@ -20,6 +20,11 @@ class Committer(Protocol):
         raise NotImplementedError
 
 
+class Closer(Protocol):
+    async def close(self):
+        raise NotImplementedError
+
+
 class CreateUser(Protocol):
     async def create_user(self, user: User) -> UserId:
         raise NotImplementedError

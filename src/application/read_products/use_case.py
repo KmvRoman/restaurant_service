@@ -22,6 +22,7 @@ class ReadProductsCase(UseCase[ReadProductsDtoInput, ReadProductsDtoOutput]):
         )
         if products is None:
             raise ProductNotExistError
+        await self.db_gateway.close()
         return [
             ReadProductsDtoOutput(
                 id=cat.id, category=cat.category,

@@ -48,6 +48,13 @@ class UserRepository(BaseRepository):
     async def commit(self):
         await self.session.commit()
 
+    async def close(self):
+        await self.session.close()
+
+    async def wefwef(self):
+        await self.session.close()
+        await self.session.begin()
+
     async def rollback(self):
         await self.session.rollback()
 
@@ -296,6 +303,7 @@ class UserRepository(BaseRepository):
             RestaurantBannerTable.restaurant_id == restaurant_id
         ).order_by(RestaurantBannerTable.id)
         result = (await self.session.execute(stmt)).all()
+        await self.session.close()
         return [i[0] for i in result]
 
     async def get_addresses(self, restaurant_id: RestaurantId) -> list[tuple]:

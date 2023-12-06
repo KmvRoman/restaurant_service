@@ -56,18 +56,18 @@ class ReplyKeyboard:
     def webapp_menu(
             self, button: type[WebApp], user_id: UserId, restaurant_id: RestaurantId,
             user_location: Location | None, language: Language, restaurant_location_id: int,
-            order_type: OrderType,) -> ReplyKeyboardMarkup:
+            order_type: OrderType, ) -> ReplyKeyboardMarkup:
         if user_location is None:
             return ReplyKeyboardMarkup(resize_keyboard=True, keyboard=[
                 [KeyboardButton(web_app=WebAppInfo(
-                    url=f"{CommunicationAddress.frontend}/?user_id={user_id}&restaurant_id={restaurant_id}&"
+                    url=f"{CommunicationAddress.frontend}?user_id={user_id}&restaurant_id={restaurant_id}&"
                         f"&user_language={language}&restaurant_location_id={restaurant_location_id}&"
                         f"order_type={order_type}"
                 ), text=button.webapp)]
             ])
         return ReplyKeyboardMarkup(resize_keyboard=True, keyboard=[
             [KeyboardButton(web_app=WebAppInfo(
-                url=f"{CommunicationAddress.frontend}/?user_id={user_id}&restaurant_id={restaurant_id}&"
+                url=f"{CommunicationAddress.frontend}?user_id={user_id}&restaurant_id={restaurant_id}&"
                     f"latitude={user_location.latitude}&longitude={user_location.longitude}&user_language={language}&"
                     f"restaurant_location_id={restaurant_location_id}&order_type={order_type}"
             ), text=button.webapp)]

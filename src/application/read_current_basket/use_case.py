@@ -34,6 +34,7 @@ class ReadCurrentBasketCase(UseCase[ReadCurrentBasketDtoInput, ReadCurrentBasket
         basket_view = self.basket_view_service.current_basket(
             basket=basket, shipping_amount=shipping_amount, shipping_length=shipping_length, order_type=data.order_type,
         )
+        await self.db_gateway.close()
         return ReadCurrentBasketDtoOutput(
             user_id=basket_view.user_id, prepared=[
                 PreparedBasketProduct(

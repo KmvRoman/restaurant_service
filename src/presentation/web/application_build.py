@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError, HTTPException
 from fastapi.openapi.utils import get_openapi
 
@@ -19,7 +20,7 @@ from src.presentation.web.error_handlers.http_error import http_error_handler, d
 from src.presentation.web.exceptions.application.basket import WebApplicationError
 from src.presentation.web.middlewares.process_time_middleware import add_process_time_header
 
-ALLOWED_METHODS = ["POST", "PUT", "DELETE", "GET"]
+ALLOWED_METHODS = ["HEAD", "DELETE", "POST", "GET", "OPTIONS", "PUT", "PATCH"]
 
 
 class DevelopmentApplicationBuilder:
@@ -33,6 +34,26 @@ class DevelopmentApplicationBuilder:
 
     @no_type_check
     def setup_middlewares(self):
+        headers = [
+            "Content-Type",
+            "Authorization",
+            "accept",
+            "Accept-Encoding",
+            "Content-Length",
+            "Origin",
+            "Access-Control-Request-Method",
+            "Access-Control-Request-Headers",
+            "Access-Control-Allow-Origin"
+        ]
+        self.app.add_middleware(
+            CORSMiddleware,
+            allow_origins=["*"],
+            allow_credentials=True,
+            allow_methods=ALLOWED_METHODS,
+            allow_headers=headers,
+            expose_headers=["User-Agent", "Authorization"],
+            max_age=600,
+        )
         self.app.add_middleware(BaseHTTPMiddleware, dispatch=add_process_time_header)
 
     def configure_openapi_schema(self) -> None:
@@ -70,11 +91,12 @@ class DevelopmentApplicationBuilder:
         )
         redis = RedisCacheSystem(redis=redis_connect())
 
-        ioc = IoC(db_gateway=user_repo, redis_cache=redis, config=self.config)
+        ioc = IoC(db_gateway=UserRepository(session_or_pool=session_make), redis_cache=redis, config=self.config)
 
         self.app.dependency_overrides.update(
             {
-                IocDependencyMarker: lambda: ioc,
+                IocDependencyMarker: lambda: IoC(db_gateway=UserRepository(session_or_pool=session_make),
+                                                 redis_cache=redis, config=self.config),
                 UserRepositoryDependencyMarker: lambda: user_repo,
             }
         )
