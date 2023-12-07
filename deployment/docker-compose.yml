@@ -15,6 +15,18 @@ services:
     networks:
       - app-network
 
+  cache:
+    image: redis:7.2
+    container_name: cache
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+    command: redis-server --requirepass gDI1KaUqnbzbqRxEtxTY0vXRQ/yR6rTFnRBr2putcU0d++uiX8vLw5++zfEXybjSJh73kNS8xOPaZlA1
+    volumes:
+      - cache:/data
+
   app:
     container_name: restaurant-back
     build:
@@ -30,6 +42,8 @@ services:
 
 volumes:
   db_volume:
+  cache:
+    driver: local
 
 networks:
   app-network:
