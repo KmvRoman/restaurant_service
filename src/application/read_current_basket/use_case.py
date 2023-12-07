@@ -19,8 +19,8 @@ class ReadCurrentBasketCase(UseCase[ReadCurrentBasketDtoInput, ReadCurrentBasket
 
     async def __call__(self, data: ReadCurrentBasketDtoInput) -> ReadCurrentBasketDtoOutput:
         basket = await self.db_gateway.read_current_basket(user_id=data.user_id, language=data.language)
-        if basket is None:
-            raise CurrentBasketNotFound
+        # if basket is None:
+        raise CurrentBasketNotFound
         restaurant_location = await self.db_gateway.read_restaurant_location(
             location_id=data.restaurant_location_id)
         if data.user_location is None:

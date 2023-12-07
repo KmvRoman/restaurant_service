@@ -6,7 +6,7 @@ from src.domain.order.entities.order_view import ReadUserOrderProduct, ReadAdmin
 from src.domain.user.constants.user import Language
 from src.presentation.bot.content.content_enums import ExistingTypes
 from src.presentation.bot.content.format.format_manager import FormatManager
-from src.presentation.bot.content.text_content.constants import ConcretePaymentTypeRu, ConcretePaymentType
+from src.presentation.bot.content.text_content.constants import ConcretePaymentType
 from src.presentation.bot.content.text_content.interfaces import IText
 
 
@@ -213,3 +213,9 @@ class UzbekText(IText):
 
     def select_branches_attach_group(self) -> str:
         return "Выберите филиалы к которым хотите присоеденить текущую группу"
+
+    def empty_basket_error(self) -> str:
+        return "В корзине ничего нет ⛔️"
+
+    def critical_error(self) -> str:
+        return "Что то пошло не так..."

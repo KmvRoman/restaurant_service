@@ -1,7 +1,6 @@
 from typing import Optional
 
 from src.application.read_current_basket.dto import PreparedBasketProduct
-from src.domain.order.constants.order import OrderType
 from src.domain.order.entities.order import OrderId, Location
 from src.domain.order.entities.order_view import ReadAdminOrderProduct, ReadUserOrderProduct
 from src.domain.product.constants.product import ProductMode
@@ -11,7 +10,7 @@ from src.domain.restaurant.constants.constants import MenuProductStatus
 from src.domain.user.constants.user import Language
 from src.presentation.bot.content.content_enums import ExistingTypes
 from src.presentation.bot.content.format.format_manager import FormatManager
-from src.presentation.bot.content.text_content.constants import ConcretePaymentTypeRu, ConcretePaymentType
+from src.presentation.bot.content.text_content.constants import ConcretePaymentType
 from src.presentation.bot.content.text_content.interfaces import IText
 from src.presentation.bot.states.state_data.product import (
     ProductNameData, ProductDescriptionData, ProductPriceData, ProductPriceNameData,
@@ -357,3 +356,9 @@ class RussianText(IText):
 
     def detach_group(self) -> str:
         return "Группа отсоединена"
+
+    def empty_basket_error(self) -> str:
+        return "В корзине ничего нет ⛔️"
+
+    def critical_error(self) -> str:
+        return "Что то пошло не так..."

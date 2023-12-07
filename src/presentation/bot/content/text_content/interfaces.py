@@ -242,6 +242,12 @@ class IText(Protocol):
     def detach_group(self) -> str:
         raise NotImplementedError
 
+    def empty_basket_error(self) -> str:
+        raise NotImplementedError
+
+    def critical_error(self) -> str:
+        raise NotImplementedError
+
 
 class IFormat(Protocol):
     format: ExistingTypes
