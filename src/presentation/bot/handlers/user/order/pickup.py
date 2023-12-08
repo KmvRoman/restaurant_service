@@ -80,6 +80,7 @@ async def get_location(
     F.text.in_([i.back for i in Back.__subclasses__()]),
     StateFilter(OrderStatePickUp.accept_order, OrderStatePickUp.charge_type),
 )
+@pickup.message(F.text == "pickup", OrderStatePickUp.send_location)
 @pickup.message(F.web_app_data)
 async def webapp_exit(
         message: types.Message, bot: Bot, content: IContent, state: FSMContext,

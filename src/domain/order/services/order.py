@@ -43,7 +43,7 @@ class OrderService:
         )
 
     def calculate_shipping_amount(self, shipping_length: Optional[float]) -> int:
-        shipping_length = shipping_length / 1000
+        shipping_length = shipping_length
         if shipping_length is None:
             return 0
         elif shipping_length <= self.max_kilometers_for_fixed_shipping_amount:

@@ -78,6 +78,10 @@ async def take_address(
     F.text.in_([i.back for i in Back.__subclasses__()]),
     StateFilter(OrderStateShipping.accept_order, OrderStateShipping.charge_type, OrderStateShipping.phone),
 )
+@shipping.message(
+    F.text == "shipping",
+    StateFilter(OrderStateShipping.send_location),
+)
 @shipping.message(F.web_app_data)
 async def webapp_exit(
         message: types.Message, bot: Bot, content: IContent, state: FSMContext,
