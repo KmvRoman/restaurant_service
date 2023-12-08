@@ -1,4 +1,4 @@
-from aiohttp import ClientSession
+from aiohttp import ClientSession, TCPConnector
 from pydantic import BaseModel
 
 from src.application.common.interfaces import ShippingLength
@@ -19,7 +19,8 @@ class ShippingLengthImpl(ShippingLength):
         self.redis_cache = redis_cache
 
     async def calculate_shipping_length(self, user_location: Location, restaurant_location: Location) -> float:
-        async with ClientSession() as session:
+        conn = TCPConnector(ssl=True, verify_ssl=True)
+        async with ClientSession(connector=conn) as session:
             response = await session.get(url=(
                 f"https://cubinc.uz/maps/route?"
                 f"longitude_a={user_location.longitude}&latitude_a={user_location.latitude}&"
